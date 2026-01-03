@@ -1,0 +1,2854 @@
+
+╭─── Claude Code v2.0.76 ──────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│             Welcome back Tech Shottify!            │ started                 │
+│                                                    │ Run /init to create a … │
+│                     * ▐▛███▜▌ *                    │ ─────────────────────── │
+│                    * ▝▜█████▛▘ *                   │ Recent activity         │
+│                     *  ▘▘ ▝▝  *                    │ No recent activity      │
+│                                                    │                         │
+│    Opus 4.5 · Claude Max · tech@shottify.org's     │                         │
+│    Organization                                    │                         │
+│              F:\Codes\Crack Scrapper               │                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+> I want to use programmable search engine to search this : "real images of 
+pothole"
+--------------------
+I want google search engine to bring only images related to this search. 
+Then, I want these images to save following a naming convention such as: 
+for image 100, pothole_100_scraped_from_{scraped source url}.jpg 
+----------------------------
+I want full flexibility on how many images I want to fetch and download. 
+--------------------------
+I want the full programme to be written on python. 
+================
+First do deep research on the web and then Ultrathink to come up with a 
+solid plan which will follow all the principles of standard industrial
+practices.
+Your plan should be very minimalistic and maintain clean code principles. 
+Don't give me code snippet right now, just show the plan from high level 
+overview. After confirming it, I will move to the next stage.
+
+● I'll research Google Programmable Search Engine API for image searching first, then present a solid plan.
+
+● Web Search("Google Programmable Search Engine API image search Python 2025")
+  ⎿  Did 1 search in 26s                                                   
+
+● Web Search("Google Custom Search JSON API image results pagination limits")
+  ⎿  Did 1 search in 21s                                                   
+
+● Web Search("Google Custom Search API searchType=image Python requests
+            example")
+  ⎿  Did 1 search in 24s                                                   
+
+● Web Search("Python download images from URL best practices sanitize filename")
+  ⎿  Did 1 search in 27s                                                   
+
+● Now I have comprehensive research. Let me synthesize this into a solid plan.
+
+  ---
+  High-Level Plan: Pothole Image Scraper
+
+  Research Summary
+
+  Key API Constraints:
+  | Constraint                         | Value                      |
+  |------------------------------------|----------------------------|
+  | Results per request                | 10 max                     |
+  | Total accessible results per query | 100 max                    |
+  | Free queries/day                   | 100                        |
+  | Pagination                         | start param (1, 11, 21...) |
+
+  ---
+  Architecture Overview
+
+  ┌─────────────────────────────────────────────────────┐
+  │                     main.py                         │
+  │        (CLI entry point + orchestration)            │
+  └─────────────────┬───────────────────────────────────┘
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+  ┌───────────────┐   ┌───────────────────┐
+  │  searcher.py  │   │   downloader.py   │
+  │ (API queries) │   │ (fetch + save)    │
+  └───────────────┘   └───────────────────┘
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+             ┌────────────┐
+             │ config.py  │
+             │ (settings) │
+             └────────────┘
+
+  ---
+  Module Responsibilities
+
+  1. config.py
+
+  - Load API credentials from environment variables (.env)
+  - Define constants (base URL, default output folder)
+
+  2. searcher.py
+
+  - Single function: fetch image metadata from Google API
+  - Handle pagination automatically based on requested count
+  - Return list of {url, source_page} dictionaries
+
+  3. downloader.py
+
+  - Download image from URL with streaming
+  - Sanitize source URL for filename safety
+  - Save with naming convention: pothole_{n}_scraped_from_{sanitized_source}.{ext}
+  - Preserve original file extension (not force .jpg)
+
+  4. main.py
+
+  - CLI interface with argument parsing
+  - Accept: --query, --count, --output-dir
+  - Orchestrate search → download flow
+  - Progress feedback to user
+
+  ---
+  Key Design Decisions
+
+  | Decision                          | Rationale                                           |
+  |-----------------------------------|-----------------------------------------------------|
+  | No third-party wrapper            | Direct API calls = fewer dependencies, more control |
+  | Environment variables for secrets | Industry standard, keeps keys out of code           |
+  | Streaming downloads               | Memory efficient for large images                   |
+  | Preserve original extension       | Don't assume all images are .jpg                    |
+  | Sanitize URLs in filenames        | Prevent filesystem errors from special chars        |
+  | Single responsibility modules     | Clean separation, easy testing                      |
+
+  ---
+  Dependencies (Minimal)
+
+  requests        # HTTP client
+  python-dotenv   # Load .env file
+
+  ---
+  Naming Convention Detail
+
+  pothole_001_scraped_from_example-com-images-pothole-jpg.jpg
+          │                  │                            │
+       index          sanitized source URL         actual extension
+
+  Sanitization: Replace /, :, ?, &, = → - or remove
+
+  ---
+  User Flow
+
+  1. User sets API_KEY and CX in .env file
+  2. Run: python main.py --query "real images of pothole" --count 50 --output-dir ./images
+  3. Program fetches metadata (5 API calls for 50 images)
+  4. Program downloads each image with progress indicator
+  5. Images saved to ./images/ with proper naming
+
+  ---
+  Limitations to Acknowledge
+
+  - Max 100 images per unique query (Google API hard limit)
+  - 100 free API calls/day (then $5/1000 queries)
+  - Some image URLs may be dead/403 (graceful skip with logging)
+
+  ---
+  File Structure
+
+  pothole-scraper/
+  ├── .env                 # API_KEY, CX (git-ignored)
+  ├── .env.example         # Template for users
+  ├── main.py              # Entry point
+  ├── config.py            # Configuration loader
+  ├── searcher.py          # Google API integration
+  ├── downloader.py        # Image download logic
+  ├── requirements.txt     # Dependencies
+  └── images/              # Default output (git-ignored)
+
+  ---
+  Ready for your confirmation to proceed to implementation.
+
+  Sources:
+  - https://developers.google.com/custom-search/v1/overview
+  - https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
+  - https://blog.expertrec.com/google-custom-search-api-pagination/
+  - https://cloudinary.com/guides/web-performance/downloading-image-from-url-in-python-5-ways-with-code-examples
+  - https://pypi.org/project/sanitize-filename/
+
+> | Results per request                | 10 max                     |
+  | Total accessible results per query | 100 max 
+==================================
+Can you please explain the differences between the two? And, how are they 
+correlated? 
+Also, tell me how many images I can get the most per day? 
+
+● Great question. Let me break this down clearly:
+
+  The Two Limits Explained
+
+  | Limit          | What it means                                                                                                                         |
+  |----------------|---------------------------------------------------------------------------------------------------------------------------------------|
+  | 10 per request | Each API call returns at most 10 images. You cannot request more in one call.                                                         |
+  | 100 per query  | For any search term (e.g., "real images of pothole"), Google only exposes the first 100 results. Period. Even if 10,000 images exist. |
+
+  ---
+  How They Correlate
+
+  To get all 100 images for one search query, you need 10 API calls:
+
+  Call 1:  start=1   → images 1-10
+  Call 2:  start=11  → images 11-20
+  Call 3:  start=21  → images 21-30
+  ...
+  Call 10: start=91  → images 91-100
+
+  Total: 10 calls = 100 images (maximum for that query)
+
+  ---
+  Maximum Images Per Day
+
+  Free Tier (100 API calls/day)
+
+  | Strategy                        | API Calls Used | Images Retrieved |
+  |---------------------------------|----------------|------------------|
+  | 1 query, maxed out              | 10 calls       | 100 images       |
+  | 10 different queries, maxed out | 100 calls      | 1,000 images     |
+
+  Paid Tier (10,000 API calls/day max)
+
+  | Strategy                           | API Calls Used | Images Retrieved |
+  |------------------------------------|----------------|------------------|
+  | 1,000 different queries, maxed out | 10,000 calls   | 100,000 images   |
+
+  ---
+  The Key Insight
+
+  To get more images, you need different search queries, not more API calls on the same query.
+
+  Example variations for your use case:
+  "real images of pothole"         → 100 images
+  "pothole road damage photos"     → 100 images
+  "street pothole pictures"        → 100 images
+  "asphalt pothole images"         → 100 images
+
+  4 queries × 100 images = 400 unique pothole images (using 40 API calls)
+
+  ---
+  Summary
+
+  | Tier | Max Calls/Day | Max Images (single query) | Max Images (multiple queries) |
+  |------|---------------|---------------------------|-------------------------------|
+  | Free | 100           | 100                       | 1,000 (10 queries)            |
+  | Paid | 10,000        | 100                       | 100,000 (1,000 queries)       |
+
+  Would you like me to add multi-query support to the plan so you can maximize image collection?
+
+> Yes add multi-query support, but how can I avoid fetching duplicate 
+images?
+Do deep research on the deduplications method and ultrathink to generate 
+effecient ideas.
+
+● Web Search("Python image deduplication perceptual hash imagehash library")
+  ⎿  Did 1 search in 31s                                                   
+
+● Web Search("detect duplicate images Python dhash phash comparison")
+  ⎿  Did 1 search in 33s                                                   
+
+● Web Search("image deduplication before download URL hash vs content hash
+            strategy")
+  ⎿  Did 1 search in 32s                                                   
+
+● Web Search("Python hamming distance threshold perceptual hash duplicate
+            detection")
+  ⎿  Did 1 search in 26s                                                   
+
+● Excellent research completed. Let me present the updated plan with multi-query support and a robust deduplication strategy.
+
+  ---
+  Updated Plan: Pothole Image Scraper with Deduplication
+
+  Deduplication Strategy: Three-Layer Defense
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                    DEDUPLICATION PIPELINE                       │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                 │
+  │  Layer 1: URL Check              ⚡ Fastest (before download)   │
+  │  ────────────────────                                           │
+  │  • Hash the image URL                                           │
+  │  • Skip if URL already seen                                     │
+  │  • Catches: Same image, same source                             │
+  │                                                                 │
+  │  Layer 2: Content Hash           🔒 After download              │
+  │  ──────────────────────                                         │
+  │  • SHA-256 of raw bytes                                         │
+  │  • Skip if exact file exists                                    │
+  │  • Catches: Same image, different URLs                          │
+  │                                                                 │
+  │  Layer 3: Perceptual Hash        👁️ Visual similarity          │
+  │  ─────────────────────────                                      │
+  │  • dHash (difference hash) - fastest perceptual algorithm       │
+  │  • Hamming distance threshold ≤ 2 bits                          │
+  │  • Catches: Resized, recompressed, slightly edited images       │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ---
+  Why This Approach?
+
+  | Layer    | Speed    | What It Catches      | False Negatives             |
+  |----------|----------|----------------------|-----------------------------|
+  | URL Hash | ~0.001ms | Exact same URL       | Same image from CDN mirrors |
+  | SHA-256  | ~1ms     | Byte-identical files | Resized/recompressed copies |
+  | dHash    | ~5ms     | Visually similar     | None (with good threshold)  |
+
+  Combined: Near-zero duplicates with minimal overhead.
+
+  ---
+  Updated Architecture
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                         main.py                                 │
+  │              (CLI + orchestration + progress)                   │
+  └───────────────────────────┬─────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+  ┌───────────────┐   ┌───────────────┐   ┌───────────────────┐
+  │  searcher.py  │   │ downloader.py │   │  deduplicator.py  │
+  │  (API calls)  │   │ (fetch+save)  │   │  (3-layer check)  │
+  └───────────────┘   └───────────────┘   └───────────────────┘
+          │                   │                   │
+          └───────────────────┴───────────────────┘
+                              │
+                       ┌──────┴──────┐
+                       │  config.py  │
+                       └─────────────┘
+
+  ---
+  Module Updates
+
+  deduplicator.py (NEW)
+
+  Class: ImageDeduplicator
+  ├── seen_urls: Set[str]           # Layer 1
+  ├── content_hashes: Dict[str, str] # Layer 2: hash → filename
+  ├── perceptual_hashes: List[Tuple] # Layer 3: (dhash, filename)
+  │
+  ├── is_url_seen(url) → bool
+  ├── is_content_duplicate(image_bytes) → bool | str
+  ├── is_visual_duplicate(image_bytes, threshold=2) → bool | str
+  ├── register(url, content_hash, dhash, filename)
+  └── save_state() / load_state()   # Persist across runs
+
+  searcher.py (Updated)
+
+  - Accept list of query variations
+  - Aggregate results from multiple queries
+  - Pass to deduplicator for URL-level filtering
+
+  main.py (Updated)
+
+  New arguments:
+    --queries       Multiple search terms (or file path)
+    --threshold     Perceptual hash threshold (default: 2)
+    --skip-visual   Disable Layer 3 (faster, less accurate)
+    --resume        Load previous dedup state and continue
+
+  ---
+  Multi-Query Support
+
+  Option A: CLI Arguments
+
+  python main.py --queries "real pothole images" "road pothole photos" "street pothole damage" --count 50
+
+  Option B: Queries File
+
+  python main.py --queries-file queries.txt --count 50
+
+  # queries.txt
+  real images of pothole
+  pothole road damage photos
+  asphalt pothole pictures
+  street pothole damage
+
+  ---
+  Deduplication Thresholds
+
+  Based on research with 200,000+ images:
+
+  | dHash Bits | Threshold | Behavior                                   |
+  |------------|-----------|--------------------------------------------|
+  | 128-bit    | 0         | Exact visual match only                    |
+  | 128-bit    | 2         | Recommended - catches resizes, minor edits |
+  | 128-bit    | 4-5       | Starts catching false positives            |
+
+  ---
+  State Persistence (Resume Support)
+
+  // .dedup_state.json
+  {
+    "seen_urls": ["hash1", "hash2", ...],
+    "content_hashes": {"sha256_1": "pothole_001_...", ...},
+    "perceptual_hashes": [["dhash_1", "pothole_001_..."], ...],
+    "last_index": 47
+  }
+
+  Allows:
+  - Resume interrupted downloads
+  - Run across multiple days without re-downloading
+  - Accumulate images over time
+
+  ---
+  Updated Dependencies
+
+  requests          # HTTP client
+  python-dotenv     # Environment config
+  Pillow            # Image processing
+  imagehash         # Perceptual hashing (includes dhash)
+
+  ---
+  Final File Structure
+
+  pothole-scraper/
+  ├── .env                    # API_KEY, CX
+  ├── .env.example
+  ├── .dedup_state.json       # Persisted dedup state (auto-generated)
+  ├── main.py                 # Entry point
+  ├── config.py               # Configuration
+  ├── searcher.py             # Google API
+  ├── downloader.py           # Image fetching
+  ├── deduplicator.py         # 3-layer dedup
+  ├── queries.txt             # Optional query list
+  ├── requirements.txt
+  └── images/                 # Output
+
+  ---
+  Execution Flow
+
+  1. Load config + previous state (if --resume)
+  2. For each query in queries:
+     a. Fetch image metadata from API (paginated)
+     b. For each image URL:
+        ├─ Layer 1: Skip if URL seen → continue
+        ├─ Download image bytes
+        ├─ Layer 2: Skip if SHA-256 exists → continue
+        ├─ Layer 3: Skip if dHash within threshold → continue
+        ├─ Save image with naming convention
+        └─ Register in deduplicator
+     c. Save state periodically
+  3. Final report: downloaded / skipped (by layer) / errors
+
+  ---
+  Expected Output
+
+  $ python main.py --queries-file queries.txt --count 100 --output-dir ./images
+
+  [Query 1/4] "real images of pothole"
+    Fetching metadata... 100 images found
+    Downloading: ████████████████████ 100/100
+    ✓ Downloaded: 87 | Skipped: 13 (URL: 2, SHA: 5, Visual: 6)
+
+  [Query 2/4] "pothole road damage photos"
+    Fetching metadata... 100 images found
+    Downloading: ████████████████████ 100/100
+    ✓ Downloaded: 34 | Skipped: 66 (URL: 12, SHA: 28, Visual: 26)
+
+  ...
+
+  ═══════════════════════════════════════════
+  Total: 156 unique images saved to ./images/
+  Duplicates prevented: 244 (URL: 45, SHA: 89, Visual: 110)
+  ═══════════════════════════════════════════
+
+  ---
+  Summary: Why This Design
+
+  | Principle             | Implementation                             |
+  |-----------------------|--------------------------------------------|
+  | Minimal dependencies  | 4 packages, all well-maintained            |
+  | Single responsibility | Each module does one thing                 |
+  | Fail-safe             | State persistence, graceful error handling |
+  | Configurable          | Threshold, layers, resume capability       |
+  | Efficient             | Skip downloads early, stream large files   |
+  | Accurate              | 3-layer dedup catches all duplicate types  |
+
+  ---
+  Ready for your approval to begin implementation.
+
+  Sources:
+  - https://github.com/JohannesBuchner/imagehash
+  - https://github.com/idealo/imagededup
+  - https://benhoyt.com/writings/duplicate-image-detection/
+  - https://idealo.github.io/imagededup/methods/hashing/
+  - https://pypi.org/project/dhash/
+
+> I only want to implement layer 2 deduplication strategy, I want to fetch 
+all the images and then save only unique ones. 
+Another thing, I want to use multiple query but I want to decide what will 
+be the queries. 
+I want to save the query lists on a .txt files and I want the programme to 
+automatically read from these queries and perform the search for each 
+queries. 
+===========================
+Now, based on these requirements, now do deep research on this conversation 
+and update your plan. 
+
+● Let me review our conversation and create a simplified, focused plan based on your requirements.
+
+  ---
+  Simplified Plan: Pothole Image Scraper
+
+  Requirements Confirmed
+
+  | Requirement   | Decision                            |
+  |---------------|-------------------------------------|
+  | Deduplication | Layer 2 only (SHA-256 content hash) |
+  | Query source  | .txt file (one query per line)      |
+  | Query control | User-defined in the text file       |
+  | Flow          | Fetch all → Save only unique        |
+
+  ---
+  Simplified Architecture
+
+  ┌─────────────────────────────────────────────────────┐
+  │                     main.py                         │
+  │           (CLI + orchestration + progress)          │
+  └─────────────────────┬───────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+  ┌────────────┐  ┌────────────┐  ┌────────────┐
+  │ searcher.py│  │downloader.py│  │  utils.py  │
+  │ (API calls)│  │(fetch+save) │  │(hash+name) │
+  └────────────┘  └────────────┘  └────────────┘
+        │               │               │
+        └───────────────┴───────────────┘
+                        │
+                 ┌──────┴──────┐
+                 │  config.py  │
+                 └─────────────┘
+
+  ---
+  Module Responsibilities
+
+  config.py
+
+  - Load API_KEY and CX from .env
+  - Define constants (API URL, default output folder)
+
+  searcher.py
+
+  - Read queries from .txt file
+  - For each query: fetch image metadata with pagination
+  - Return aggregated list of {url, source_page} dicts
+
+  downloader.py
+
+  - Download image bytes from URL (streaming)
+  - Compute SHA-256 hash of content
+  - Check against seen hashes set
+  - If unique: save with naming convention
+  - If duplicate: skip
+
+  utils.py
+
+  - sanitize_filename(url) → safe string for filesystem
+  - get_file_extension(url, content_type) → proper extension
+  - compute_hash(bytes) → SHA-256 hex digest
+
+  main.py
+
+  - CLI argument parsing
+  - Load queries from file
+  - Orchestrate: search → download → deduplicate → save
+  - Progress display and final report
+
+  ---
+  Deduplication Flow
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │   For each image URL:                                        │
+  │                                                              │
+  │   ┌─────────────┐     ┌─────────────┐     ┌──────────────┐  │
+  │   │  Download   │────▶│ Compute     │────▶│ Hash in set? │  │
+  │   │  bytes      │     │ SHA-256     │     └──────┬───────┘  │
+  │   └─────────────┘     └─────────────┘            │          │
+  │                                                  │          │
+  │                              ┌───────────────────┴────┐     │
+  │                              ▼                        ▼     │
+  │                         ┌────────┐              ┌────────┐  │
+  │                         │  YES   │              │   NO   │  │
+  │                         │ (skip) │              │ (save) │  │
+  │                         └────────┘              └───┬────┘  │
+  │                                                     │       │
+  │                                          ┌──────────▼─────┐ │
+  │                                          │ Save to disk   │ │
+  │                                          │ Add hash to set│ │
+  │                                          └────────────────┘ │
+  │                                                              │
+  └──────────────────────────────────────────────────────────────┘
+
+  ---
+  Queries File Format
+
+  # queries.txt (lines starting with # are ignored)
+
+  real images of pothole
+  pothole road damage photos
+  asphalt pothole pictures
+  street pothole close up
+  pothole on highway
+
+  - One query per line
+  - Empty lines ignored
+  - Lines starting with # treated as comments
+
+  ---
+  Naming Convention
+
+  pothole_001_scraped_from_example-com-path-to-image.jpg
+  │        │              │                          │
+  │        │              │                          └─ Original extension
+  │        │              └─ Sanitized source URL
+  │        └─ Global index (across all queries)
+  └─ Prefix
+
+  Sanitization rules:
+  - https:// and http:// → removed
+  - /, :, ?, &, =, % → -
+  - Multiple - → single -
+  - Truncate if too long (filesystem limits)
+
+  ---
+  CLI Interface
+
+  # Basic usage
+  python main.py --queries queries.txt --count 50 --output ./images
+
+  # Arguments
+  --queries     Path to queries .txt file (required)
+  --count       Max images per query (default: 100, max: 100)
+  --output      Output directory (default: ./images)
+
+  ---
+  Dependencies (Minimal)
+
+  requests        # HTTP client
+  python-dotenv   # Load .env file
+
+  No additional libraries needed - SHA-256 is built into Python's hashlib.
+
+  ---
+  File Structure
+
+  pothole-scraper/
+  ├── .env                 # API_KEY, CX (git-ignored)
+  ├── .env.example         # Template
+  ├── queries.txt          # User-defined queries
+  ├── main.py              # Entry point
+  ├── config.py            # Configuration
+  ├── searcher.py          # Google API integration
+  ├── downloader.py        # Download + dedup logic
+  ├── utils.py             # Helper functions
+  ├── requirements.txt     # Dependencies
+  └── images/              # Output (git-ignored)
+
+  ---
+  Execution Flow
+
+  1. Parse CLI arguments
+  2. Load API credentials from .env
+  3. Read queries from .txt file
+  4. Initialize empty hash set
+  5. Initialize global image counter = 0
+
+  6. For each query:
+     a. Fetch image metadata (paginated up to --count)
+     b. For each image:
+        ├─ Download bytes
+        ├─ Compute SHA-256
+        ├─ If hash NOT in set:
+        │   ├─ counter += 1
+        │   ├─ Generate filename: pothole_{counter}_scraped_from_{sanitized_url}.{ext}
+        │   ├─ Save to disk
+        │   └─ Add hash to set
+        └─ Else: skip (duplicate)
+     c. Log progress
+
+  7. Print final report
+
+  ---
+  Expected Output
+
+  $ python main.py --queries queries.txt --count 50 --output ./images
+
+  Loading queries from queries.txt...
+  Found 5 queries
+
+  [1/5] "real images of pothole"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 47 | Duplicates: 3
+
+  [2/5] "pothole road damage photos"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 31 | Duplicates: 19
+
+  [3/5] "asphalt pothole pictures"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 28 | Duplicates: 22
+
+  ...
+
+  ════════════════════════════════════════════
+  Summary:
+    Total unique images: 156
+    Duplicates skipped:  94
+    Errors:              0
+    Output: ./images/
+  ════════════════════════════════════════════
+
+  ---
+  Summary
+
+  | Aspect        | Implementation                            |
+  |---------------|-------------------------------------------|
+  | Dependencies  | 2 packages only (requests, python-dotenv) |
+  | Deduplication | SHA-256 content hash (Layer 2 only)       |
+  | Query source  | User-controlled .txt file                 |
+  | Modules       | 5 files, single responsibility each       |
+  | Flexibility   | Configurable count, output dir, queries   |
+
+  ---
+  Ready for your approval to begin implementation.
+
+> Okay, start implementing. 
+
+● Write(config.py)
+  ⎿  Wrote 1 lines to config.py                               
+     """Configuration module for the pothole image scraper."""
+     import os
+     from dotenv import load_dotenv
+     # Load environment variables from .env file
+     load_dotenv()
+     # Google API credentials
+     API_KEY = os.getenv("API_KEY")
+
+● Write(utils.py)
+  ⎿  Wrote 1 lines to utils.py                             
+     """Utility functions for the pothole image scraper."""
+     import hashlib
+     import re
+     from urllib.parse import urlparse
+     def compute_hash(content: bytes) -> str:
+         """Compute SHA-256 hash of content."""
+         return hashlib.sha256(content).hexdigest()
+
+● Write(searcher.py)
+  ⎿  Wrote 1 lines to searcher.py                                  
+     """Google Custom Search API integration for image search."""
+     import requests
+     from config import API_KEY, CX, BASE_URL, RESULTS_PER_PAGE,
+     MAX_RESULTS_PER_QUERY
+     def search_images(query: str, count: int = 100) -> list[dict]:
+         """
+         Search for images using Google Custom Search API.
+
+● Write(downloader.py)
+  ⎿  Wrote 1 lines to downloader.py                                       
+     """Image downloader with SHA-256 deduplication."""
+     import os
+     import requests
+     from utils import compute_hash, sanitize_filename, get_file_extension
+     class ImageDownloader:
+         """Downloads images with content-based deduplication."""
+
+● Write(main.py)
+  ⎿  Wrote 1 lines to main.py                                              
+     """
+     Pothole Image Scraper
+     A tool to search and download pothole images using Google Custom 
+     Search API
+     with automatic deduplication.
+     """
+     import argparse
+     import sys
+     from config import validate_config, DEFAULT_OUTPUT_DIR, DEFAULT_COUNT
+
+● Write(.env.example)
+  ⎿  Wrote 1 lines to .env.example                         
+     # Google Custom Search API credentials
+     # Get your API key from:
+     https://console.developers.google.com/apis/credentials
+     # Get your CX from: https://cse.google.com/cse/all
+     API_KEY=your_api_key_here
+     CX=your_custom_search_engine_id_here
+
+● Write(queries.txt)
+  ⎿  Wrote 1 lines to queries.txt       
+     # Pothole Image Search Queries
+     # Add one query per line
+     # Lines starting with # are ignored
+     real images of pothole
+     pothole road damage photos
+     asphalt pothole pictures
+     street pothole close up
+     pothole on highway
+
+● Write(requirements.txt)
+  ⎿  Wrote 1 lines to requirements.txt
+     requests>=2.28.0
+     python-dotenv>=1.0.0
+
+● Implementation complete. Here's your project structure:
+
+  F:\Codes\Crack Scrapper\
+  ├── .env.example        # Template for API credentials
+  ├── config.py           # Configuration loader
+  ├── utils.py            # Helper functions
+  ├── searcher.py         # Google API integration
+  ├── downloader.py       # Download + SHA-256 deduplication
+  ├── main.py             # CLI entry point
+  ├── queries.txt         # Your search queries (edit this)
+  └── requirements.txt    # Dependencies
+
+  ---
+  Setup Instructions
+
+  1. Install dependencies
+
+  pip install -r requirements.txt
+
+  2. Create .env file
+
+  copy .env.example .env
+
+  Then edit .env with your credentials:
+  API_KEY=your_actual_api_key
+  CX=your_actual_cx_id
+
+  3. Edit queries.txt with your queries
+
+  # Add your queries, one per line
+  real images of pothole
+  pothole road damage
+
+  4. Run the scraper
+
+  # Basic usage
+  python main.py --queries queries.txt
+
+  # With options
+  python main.py --queries queries.txt --count 50 --output ./images
+
+  ---
+  CLI Options
+
+  | Option    | Description          | Default  |
+  |-----------|----------------------|----------|
+  | --queries | Path to queries file | Required |
+  | --count   | Max images per query | 100      |
+  | --output  | Output directory     | ./images |
+  | --prefix  | Filename prefix      | pothole  |
+
+  ---
+  Output Naming
+
+  pothole_001_scraped_from_example-com-path-image.jpg
+  pothole_002_scraped_from_another-site-com-photo.png
+
+  Would you like me to test the setup or make any adjustments?
+
+> /export chat/chat_crack_scraper_implementation_pt1.txt 
+  ⎿  Conversation exported to: chat/chat_crack_scraper_implementation_pt1.txt
+
+> Now, as per your say, I will only be able to see first 100 images per 
+queries even if there are 10000000 images related to that queries. 
+If I want to see images not from top 100, is there a way to do so? 
+Do deep research on the web, and tell me your response. Before answering, 
+you must double check and verify your answer. 
+
+● Web Search("Google Custom Search API get more than 100 results workaround")
+  ⎿  Did 1 search in 28s                                                   
+
+● Web Search("Google Programmable Search Engine bypass 100 result limit")
+  ⎿  Did 1 search in 22s                                                   
+
+● Web Search("Google image search API different results query variations site
+            filter")
+  ⎿  Did 1 search in 38s                                                   
+
+● Web Search("Google Custom Search API dateRestrict sort parameter different
+            results")
+  ⎿  Did 1 search in 22s                                                   
+
+● Fetch(https://developers.google.com/custom-search/v1/reference/rest/v1/cse/lis
+       t)
+  ⎿  Received 90.2KB (200 OK)
+
+● Now I have verified information. Here's my answer:
+
+  ---
+  The 100 Result Limit: Verified Facts
+
+  The Hard Truth
+
+  The 100-result limit is a hard constraint that CANNOT be bypassed through official means.
+
+  From https://support.google.com/programmable-search/thread/127239596:
+
+  There's a difference between two limitations:
+  - (a) max 100 queries per day — can be solved by paying
+  - (b) max 100 results per searched phrase — cannot be solved at all
+
+  This is a product design decision, not a technical limitation you can work around.
+
+  ---
+  Why Does This Limit Exist?
+
+  Google's Custom Search API is designed for website search, not bulk data collection. The 100-result cap prevents:
+  - Scraping abuse
+  - Competitive data harvesting
+  - Server overload
+
+  ---
+  Workarounds to Get MORE (Different) Images
+
+  While you can't get results 101-10000 for the same query, you CAN get different result sets by varying your search parameters:
+
+  Strategy 1: Query Variations (Already in your code)
+
+  real images of pothole          → 100 images
+  pothole road damage             → 100 different images
+  asphalt pothole close up        → 100 different images
+  highway pothole photos          → 100 different images
+
+  Strategy 2: Date Restrictions (dateRestrict)
+
+  params['dateRestrict'] = 'd30'   # Last 30 days
+  params['dateRestrict'] = 'm6'    # Last 6 months
+  params['dateRestrict'] = 'y1'    # Last 1 year
+  params['dateRestrict'] = 'y5'    # Last 5 years
+
+  Same query + different time windows = different results
+
+  Strategy 3: Image Size Filters (imgSize)
+
+  # Each returns different image sets
+  params['imgSize'] = 'large'
+  params['imgSize'] = 'xlarge'
+  params['imgSize'] = 'xxlarge'
+  params['imgSize'] = 'huge'
+
+  Strategy 4: Image Type Filters (imgType)
+
+  params['imgType'] = 'photo'      # Photographs only
+  params['imgType'] = 'stock'      # Stock photos
+
+  Strategy 5: Site-Specific Search (siteSearch)
+
+  params['siteSearch'] = 'flickr.com'
+  params['siteSearch'] = 'shutterstock.com'
+  params['siteSearch'] = 'wikipedia.org'
+
+  Strategy 6: Rights/License Filter (rights)
+
+  params['rights'] = 'cc_publicdomain'
+  params['rights'] = 'cc_attribute'
+
+  ---
+  Maximum Theoretical Images Per Day
+
+  | Tier           | Queries/Day | If Each Query Uses All Filters |
+  |----------------|-------------|--------------------------------|
+  | Free           | 100         | ~1,000 unique images           |
+  | Paid ($5/1000) | 10,000      | ~100,000 unique images         |
+
+  Example combination:
+  - 5 query variations × 4 size filters × 3 date ranges = 60 unique result sets
+  - 60 × 100 images = 6,000 potential unique images (minus duplicates)
+
+  ---
+  Updated Recommendation
+
+  I can enhance your scraper to automatically combine these filters:
+
+  queries.txt:
+  real images of pothole
+  pothole road damage
+
+  Auto-expanded to:
+  "real images of pothole" + imgSize=large
+  "real images of pothole" + imgSize=xlarge
+  "real images of pothole" + dateRestrict=y1
+  "pothole road damage" + imgSize=large
+  ...
+
+  This multiplies your effective reach while staying within API limits.
+
+  ---
+  Summary
+
+  | Question                                    | Answer                             |
+  |---------------------------------------------|------------------------------------|
+  | Can I get result #101-10000 for same query? | No (hard limit)                    |
+  | Can I get more images overall?              | Yes (via filters/variations)       |
+  | Is there an official bypass?                | No                                 |
+  | Best strategy?                              | Combine query variations + filters |
+
+  ---
+  Would you like me to update the scraper to automatically apply these filter combinations?
+
+  Sources:
+  - https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
+  - https://support.google.com/programmable-search/thread/127239596
+  - https://blog.expertrec.com/google-custom-search-more-than-100-results-view/
+  - https://developers.google.com/custom-search/docs/structured_search
+
+> Example combination:
+  - 5 query variations × 4 size filters × 3 date ranges = 60 unique result 
+sets
+  - 60 × 100 images = 6,000 potential unique images (minus duplicates)
+===================
+According to these exam will it be count as 5 queries or 60 queries? 
+Does it mean after these I will be with 40 queries left for that day? 
+
+● Excellent question - this is a critical distinction to understand.
+
+  ---
+  API Query Counting
+
+  Each API call = 1 query from your daily quota
+
+  Not each "search term" - each HTTP request to the API.
+
+  ---
+  Let's Calculate Your Example
+
+  5 query variations × 4 size filters × 3 date ranges = 60 combinations
+
+  Each combination needs 10 API calls to get 100 images (10 images per call):
+
+  | What                             | Calculation | API Calls Used |
+  |----------------------------------|-------------|----------------|
+  | 1 combination, 100 images        | 100 ÷ 10    | 10 calls       |
+  | 60 combinations, 100 images each | 60 × 10     | 600 calls      |
+
+  ---
+  Free Tier Reality Check
+
+  | Tier | Daily Limit  | What You Can Actually Get                        |
+  |------|--------------|--------------------------------------------------|
+  | Free | 100 calls    | 10 combinations × 100 images = 1,000 images      |
+  | Free | 100 calls    | 100 combinations × 10 images = 1,000 images      |
+  | Paid | 10,000 calls | 1,000 combinations × 100 images = 100,000 images |
+
+  Your example (60 combinations × 100 images) would require 600 API calls = $2.50 on paid tier
+
+  ---
+  Corrected Example
+
+  With free tier (100 calls/day):
+
+  Option A: Depth over breadth
+  - 10 combinations × 10 calls each = 100 calls
+  - 10 × 100 images = 1,000 images max
+
+  Option B: Breadth over depth
+  - 50 combinations × 2 calls each = 100 calls
+  - 50 × 20 images = 1,000 images max
+
+  ---
+  Your Specific Question
+
+  After 60 combinations, will I have 40 queries left?
+
+  No. You'd be over budget:
+
+  60 combinations × 10 calls = 600 calls needed
+  Free tier                  = 100 calls available
+  Deficit                    = 500 calls (need paid tier)
+
+  ---
+  Visual Summary
+
+  FREE TIER: 100 API calls/day
+  ═══════════════════════════════════════════════════
+
+  1 query term + 100 images     = 10 calls    ✓ (90 left)
+  2 query terms + 100 images    = 20 calls    ✓ (80 left)
+  5 query terms + 100 images    = 50 calls    ✓ (50 left)
+  10 query terms + 100 images   = 100 calls   ✓ (0 left) MAX
+  20 query terms + 100 images   = 200 calls   ✗ OVER LIMIT
+
+  ---
+  Bottom Line
+
+  | Your Question                         | Answer                         |
+  |---------------------------------------|--------------------------------|
+  | 60 combinations = how many API calls? | 600 calls (if 100 images each) |
+  | Queries left after 60 combinations?   | -500 (over free limit)         |
+  | Max images on free tier?              | 1,000 (100 calls × 10 images)  |
+
+  Would you like me to add a --max-api-calls parameter to the scraper so you can control your daily budget?
+
+> Is this limit on cx id? or on google account? 
+If I use multiple cx id should I be able to bypass it? 
+
+● Web Search("Google Custom Search API quota limit per API key or per CX ID")
+  ⎿  Did 2 searches in 30s                                                 
+
+● Web Search("Google Custom Search API multiple CX engines same API key quota")
+  ⎿  Did 1 search in 25s                                                   
+
+● Web Search("Google Cloud multiple projects API quota bypass Custom Search free
+             tier")
+  ⎿  Did 1 search in 28s                                                   
+
+● Now I have verified information. Here's the answer:
+
+  ---
+  Where is the Quota Limit Applied?
+
+  The Quota is Per Google Cloud Project, NOT per CX ID
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │                   GOOGLE CLOUD PROJECT                      │
+  │                                                             │
+  │   API Key ──────────────────► QUOTA COUNTER (100/day)       │
+  │      │                                                      │
+  │      ├── CX ID #1 (pothole search)    ─┐                    │
+  │      ├── CX ID #2 (crack search)       ├── Share same quota │
+  │      └── CX ID #3 (road damage search)─┘                    │
+  │                                                             │
+  └─────────────────────────────────────────────────────────────┘
+
+  | Component | What it controls                              | Quota impact              |
+  |-----------|-----------------------------------------------|---------------------------|
+  | API Key   | Identifies your project, tracks usage         | YES - quota tied here     |
+  | CX ID     | Search engine configuration (sites, settings) | NO - doesn't affect quota |
+
+  ---
+  Can Multiple CX IDs Bypass the Limit?
+
+  No. Multiple CX IDs with the same API key share the same 100 queries/day.
+
+  API Key: abc123
+  ├── CX #1: 40 queries  ─┐
+  ├── CX #2: 35 queries   ├── Total: 100 queries (LIMIT REACHED)
+  └── CX #3: 25 queries  ─┘
+
+  ---
+  What CAN Bypass the Limit?
+
+  Multiple Google Cloud Projects = Multiple Quotas
+
+  Project A (API Key #1) → 100 free queries/day
+  Project B (API Key #2) → 100 free queries/day
+  Project C (API Key #3) → 100 free queries/day
+  ─────────────────────────────────────────────
+  Total                  → 300 free queries/day
+
+  This works because:
+  "Rate limits are applied per project rather than per account. Each project gets its own independent free tier allocation."
+
+  ---
+  How to Set This Up
+
+  Step 1: Create Multiple Google Cloud Projects
+
+  https://console.cloud.google.com
+  ├── Project: pothole-scraper-1
+  ├── Project: pothole-scraper-2
+  └── Project: pothole-scraper-3
+
+  Step 2: Enable Custom Search API in Each Project
+
+  Step 3: Generate API Key for Each Project
+
+  API_KEY_1=xxxxxxx  (Project 1)
+  API_KEY_2=yyyyyyy  (Project 2)
+  API_KEY_3=zzzzzzz  (Project 3)
+
+  Step 4: Create One CX ID (Can Be Shared)
+
+  CX=your_single_cx_id  (works with all API keys)
+
+  ---
+  Risk Assessment
+
+  | Method                     | Risk Level | Notes                   |
+  |----------------------------|------------|-------------------------|
+  | 1 project, pay for more    | None       | Google's preferred path |
+  | 2-3 projects, same account | Low        | Legitimate use case     |
+  | 10+ projects, same account | Moderate   | May trigger review      |
+  | Multiple Google accounts   | Higher     | Against ToS spirit      |
+
+  From https://support.google.com/cloud/answer/6330231:
+  "Google considers previous usage and history... and previous abuse penalties to determine whether to grant/approve requests."
+
+  ---
+  Practical Recommendation
+
+  | Need               | Solution                    |
+  |--------------------|-----------------------------|
+  | ≤100 queries/day   | 1 project (free)            |
+  | ≤300 queries/day   | 3 projects (free, low risk) |
+  | ≤1,000 queries/day | Pay $5 (safest)             |
+  | >1,000 queries/day | Pay + multiple projects     |
+
+  ---
+  Updated Code Support
+
+  I can modify the scraper to support multiple API keys with automatic rotation:
+
+  # .env
+  API_KEY_1=xxxxx
+  API_KEY_2=yyyyy
+  API_KEY_3=zzzzz
+  CX=your_cx_id
+
+  The scraper would automatically rotate between keys when one hits quota.
+
+  Would you like me to add multi-API-key rotation to the scraper?
+
+  ---
+  Sources:
+  - https://support.google.com/programmable-search/thread/89178434
+  - https://developers.google.com/custom-search/v1/overview
+  - https://support.google.com/cloud/answer/6330231
+  - https://cloud.google.com/docs/quotas/quota-project
+
+> Yes add multi-API-key rotation support and also multiple cx id support, I 
+will use different cx id for each API key. 
+So modify the code to support these requirements. 
+-----------------------------------
+Also, 
+I want you to add these filters more bringing variation in results. 
+  Strategy 2: Date Restrictions (dateRestrict)
+
+  params['dateRestrict'] = 'd30'   # Last 30 days
+  params['dateRestrict'] = 'm6'    # Last 6 months
+  params['dateRestrict'] = 'y1'    # Last 1 year
+  params['dateRestrict'] = 'y5'    # Last 5 years
+
+  Same query + different time windows = different results
+
+  Strategy 3: Image Size Filters (imgSize)
+
+  # Each returns different image sets
+  params['imgSize'] = 'large'
+  params['imgSize'] = 'xlarge'
+  params['imgSize'] = 'xxlarge'
+ params['imgSize'] = 'huge'
+-----------------
+These filters will work in this way: 
+first will bring images from d30 with different image size from large, 
+xlarge, xxlarge, huge. 
+one by one . 
+Then, it will do for the rest of the datarestrict param. 
+=================================
+Now on these requirements update the code but before updating it first give 
+me your plan in details and only after my confirmation, you will implement 
+this. 
+
+● I'll create a detailed plan for these enhancements.
+
+  ---
+  Implementation Plan: Multi-Key Rotation + Filter Combinations
+
+  Overview of Changes
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                      ENHANCED ARCHITECTURE                       │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                 │
+  │  .env                                                           │
+  │  ├── API_KEY_1 + CX_1                                          │
+  │  ├── API_KEY_2 + CX_2                                          │
+  │  └── API_KEY_3 + CX_3                                          │
+  │                                                                 │
+  │  Filter Combinations (per query):                               │
+  │  ├── dateRestrict: d30 → m6 → y1 → y5                          │
+  │  │   └── imgSize: large → xlarge → xxlarge → huge              │
+  │  └── Total: 4 × 4 = 16 combinations per query                  │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ---
+  Execution Flow
+
+  For each QUERY in queries.txt:
+  │
+  ├── For each DATE_FILTER (d30 → m6 → y1 → y5):
+  │   │
+  │   └── For each SIZE_FILTER (large → xlarge → xxlarge → huge):
+  │       │
+  │       ├── Select current API_KEY + CX pair
+  │       ├── Make API calls (up to 10 for 100 images)
+  │       ├── If quota exceeded → rotate to next API_KEY + CX
+  │       ├── Download images
+  │       └── Deduplicate via SHA-256
+  │
+  └── Move to next query
+
+  ---
+  Filter Combination Order
+
+  For query: "real images of pothole"
+
+  | #   | dateRestrict | imgSize | API Calls (max) |
+  |-----|--------------|---------|-----------------|
+  | 1   | d30          | large   | 10              |
+  | 2   | d30          | xlarge  | 10              |
+  | 3   | d30          | xxlarge | 10              |
+  | 4   | d30          | huge    | 10              |
+  | 5   | m6           | large   | 10              |
+  | 6   | m6           | xlarge  | 10              |
+  | 7   | m6           | xxlarge | 10              |
+  | 8   | m6           | huge    | 10              |
+  | 9   | y1           | large   | 10              |
+  | 10  | y1           | xlarge  | 10              |
+  | 11  | y1           | xxlarge | 10              |
+  | 12  | y1           | huge    | 10              |
+  | 13  | y5           | large   | 10              |
+  | 14  | y5           | xlarge  | 10              |
+  | 15  | y5           | xxlarge | 10              |
+  | 16  | y5           | huge    | 10              |
+
+  Per query: 16 combinations × 10 calls = 160 API calls max
+
+  ---
+  File Changes
+
+  1. .env (Updated)
+
+  # API Key and CX pairs (add as many as needed)
+  API_KEY_1=your_first_api_key
+  CX_1=your_first_cx_id
+
+  API_KEY_2=your_second_api_key
+  CX_2=your_second_cx_id
+
+  API_KEY_3=your_third_api_key
+  CX_3=your_third_cx_id
+
+  2. config.py (Updated)
+
+  Changes:
+  - Load multiple API_KEY_n and CX_n pairs dynamically
+  - Store as list of tuples: [(API_KEY_1, CX_1), (API_KEY_2, CX_2), ...]
+  - Add filter constants:
+    - DATE_FILTERS = ['d30', 'm6', 'y1', 'y5']
+    - SIZE_FILTERS = ['large', 'xlarge', 'xxlarge', 'huge']
+
+  3. api_manager.py (NEW)
+
+  Purpose: Manage API key rotation and quota tracking
+
+  Class: APIManager
+  ├── credentials: List[Tuple[str, str]]  # [(key, cx), ...]
+  ├── current_index: int
+  ├── quota_exceeded: Set[int]  # Indices of exhausted keys
+  │
+  ├── get_current_credentials() → Tuple[str, str]
+  ├── rotate_to_next() → bool  # Returns False if all exhausted
+  ├── mark_quota_exceeded()
+  └── has_available_keys() → bool
+
+  4. searcher.py (Updated)
+
+  Changes:
+  - Accept APIManager instance instead of single key/cx
+  - Accept dateRestrict and imgSize parameters
+  - Handle 429 (quota exceeded) errors → trigger rotation
+  - Generate all filter combinations for a query
+
+  New function:
+  - generate_filter_combinations() → List[Dict]
+    Returns: [
+      {'dateRestrict': 'd30', 'imgSize': 'large'},
+      {'dateRestrict': 'd30', 'imgSize': 'xlarge'},
+      ...
+    ]
+
+  Updated function:
+  - search_images(query, filters, api_manager, count) → List[Dict]
+
+  5. main.py (Updated)
+
+  Changes:
+  - Initialize APIManager with all credential pairs
+  - For each query:
+    - For each filter combination:
+      - Call search_images with current filters
+      - Handle key rotation on quota errors
+  - Display which API key is being used
+  - Show filter combination progress
+
+  New CLI options:
+  --no-filters    Skip date/size filters (use only base query)
+  --date-only     Only use date filters, skip size filters
+  --size-only     Only use size filters, skip date filters
+
+  6. .env.example (Updated)
+
+  Updated to show multi-key format
+
+  ---
+  Updated File Structure
+
+  pothole-scraper/
+  ├── .env                 # Multiple API_KEY_n + CX_n pairs
+  ├── .env.example         # Updated template
+  ├── config.py            # Updated: load multiple keys + filter constants
+  ├── api_manager.py       # NEW: key rotation logic
+  ├── searcher.py          # Updated: filters + rotation support
+  ├── downloader.py        # No changes
+  ├── utils.py             # No changes
+  ├── main.py              # Updated: orchestration with filters
+  ├── queries.txt          # No changes
+  └── requirements.txt     # No changes
+
+  ---
+  API Call Calculation
+
+  Example: 3 queries, 3 API keys
+
+  Queries: 3
+  Filter combinations per query: 16 (4 dates × 4 sizes)
+  Max images per combination: 100 (10 API calls)
+
+  Total API calls needed: 3 × 16 × 10 = 480 calls
+  Available (3 keys): 3 × 100 = 300 calls
+
+  Result: Will exhaust all keys before completing all combinations
+
+  With --count 20 (2 API calls per combination):
+
+  Total API calls needed: 3 × 16 × 2 = 96 calls
+  Available (3 keys): 300 calls
+
+  Result: Completes with capacity to spare
+
+  ---
+  Expected Output
+
+  $ python main.py --queries queries.txt --count 20 --output ./images
+
+  Loading 3 API key pairs...
+  Loading queries from queries.txt...
+  Found 2 queries
+
+  ══════════════════════════════════════════════════════════════
+  [Query 1/2] "real images of pothole"
+  ══════════════════════════════════════════════════════════════
+
+  Using API Key #1
+
+  [Filter 1/16] dateRestrict=d30, imgSize=large
+    Fetching: 20 images... Found: 20
+    Downloading: [████████████████████] 20/20
+    Saved: 18 | Duplicates: 2
+
+  [Filter 2/16] dateRestrict=d30, imgSize=xlarge
+    Fetching: 20 images... Found: 20
+    Downloading: [████████████████████] 20/20
+    Saved: 12 | Duplicates: 8
+
+  ...
+
+  [!] API Key #1 quota exceeded. Rotating to Key #2...
+
+  [Filter 9/16] dateRestrict=y1, imgSize=large
+    Using API Key #2
+    Fetching: 20 images... Found: 20
+    ...
+
+  ══════════════════════════════════════════════════════════════
+  SUMMARY
+  ══════════════════════════════════════════════════════════════
+    Queries processed:     2
+    Filter combinations:   32 (16 × 2)
+    Total images found:    640
+    Unique images saved:   423
+    Duplicates skipped:    217
+    API keys used:         2 of 3
+    Output directory:      ./images
+  ══════════════════════════════════════════════════════════════
+
+  ---
+  CLI Options (Updated)
+
+  | Option       | Description                        | Default  |
+  |--------------|------------------------------------|----------|
+  | --queries    | Path to queries file               | Required |
+  | --count      | Max images per filter combination  | 100      |
+  | --output     | Output directory                   | ./images |
+  | --prefix     | Filename prefix                    | pothole  |
+  | --no-filters | Skip all filters (base query only) | False    |
+  | --date-only  | Use only date filters              | False    |
+  | --size-only  | Use only size filters              | False    |
+
+  ---
+  Key Rotation Logic
+
+  ┌─────────────────────────────────────────────────────────┐
+  │                    API CALL FLOW                        │
+  ├─────────────────────────────────────────────────────────┤
+  │                                                         │
+  │  Make API Request                                       │
+  │       │                                                 │
+  │       ▼                                                 │
+  │  ┌─────────┐                                           │
+  │  │ Success │──────────────────────► Process results    │
+  │  └─────────┘                                           │
+  │       │                                                 │
+  │       ▼ (429 or quota error)                           │
+  │  ┌─────────────────┐                                   │
+  │  │ Mark key as     │                                   │
+  │  │ exhausted       │                                   │
+  │  └────────┬────────┘                                   │
+  │           │                                             │
+  │           ▼                                             │
+  │  ┌─────────────────┐     ┌─────────────────┐           │
+  │  │ More keys       │─YES─▶ Rotate to next  │──► Retry  │
+  │  │ available?      │     │ API key + CX    │           │
+  │  └────────┬────────┘     └─────────────────┘           │
+  │           │ NO                                          │
+  │           ▼                                             │
+  │  ┌─────────────────┐                                   │
+  │  │ Stop processing │                                   │
+  │  │ Report results  │                                   │
+  │  └─────────────────┘                                   │
+  │                                                         │
+  └─────────────────────────────────────────────────────────┘
+
+  ---
+  Summary of Changes
+
+  | File           | Status    | Changes                             |
+  |----------------|-----------|-------------------------------------|
+  | config.py      | Update    | Multi-key loading, filter constants |
+  | api_manager.py | New       | Key rotation, quota tracking        |
+  | searcher.py    | Update    | Filter params, rotation integration |
+  | main.py        | Update    | Filter loops, new CLI options       |
+  | .env.example   | Update    | Multi-key template                  |
+  | downloader.py  | No change | -                                   |
+  | utils.py       | No change | -                                   |
+
+  ---
+  Please confirm this plan and I will begin implementation.
+
+> Now, I want a small modification. 
+----------------
+If I have exhaust all the quota before finishing the queries and the 
+combination, I want to have a log or record, so that when I run this project
+ next time, first it will check that and if in the record it is shown as 
+completed, it will start from the begin and otherwise, it will pick up from 
+where it left. 
+
+● Excellent idea! I'll add a checkpoint/resume system to the plan.
+
+  ---
+  Updated Plan: Adding Checkpoint/Resume System
+
+  New Component: Progress Tracker
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                     CHECKPOINT SYSTEM                            │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                 │
+  │  progress.json                                                  │
+  │  ├── status: "in_progress" | "completed"                        │
+  │  ├── last_query_index: 2                                        │
+  │  ├── last_filter_index: 7                                       │
+  │  ├── completed_combinations: [...]                              │
+  │  ├── seen_hashes: [...]  (for deduplication across runs)        │
+  │  ├── image_counter: 156                                         │
+  │  └── timestamp: "2026-01-03T10:30:00"                           │
+  │                                                                 │
+  │  On Start:                                                      │
+  │  ├── Check progress.json exists?                                │
+  │  │   ├── YES + status="in_progress" → Resume from checkpoint    │
+  │  │   ├── YES + status="completed"   → Start fresh               │
+  │  │   └── NO                         → Start fresh               │
+  │  │                                                              │
+  │  On Quota Exhausted:                                            │
+  │  └── Save current state to progress.json                        │
+  │                                                                 │
+  │  On Completion:                                                 │
+  │  └── Mark status="completed" in progress.json                   │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ---
+  Progress File Format
+
+  progress.json
+
+  {
+    "status": "in_progress",
+    "started_at": "2026-01-03T10:00:00",
+    "updated_at": "2026-01-03T10:30:00",
+    "queries_file": "queries.txt",
+    "total_queries": 5,
+    "total_combinations": 80,
+
+    "current_position": {
+      "query_index": 2,
+      "filter_index": 7
+    },
+
+    "completed": [
+      {"query_index": 0, "filter_index": 0},
+      {"query_index": 0, "filter_index": 1},
+      ...
+    ],
+
+    "stats": {
+      "images_saved": 156,
+      "duplicates_skipped": 43,
+      "errors": 2
+    },
+
+    "seen_hashes": [
+      "a1b2c3d4e5f6...",
+      "b2c3d4e5f6a1...",
+      ...
+    ],
+
+    "image_counter": 156
+  }
+
+  ---
+  Resume Flow
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                      STARTUP FLOW                                │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                 │
+  │  python main.py --queries queries.txt                           │
+  │       │                                                         │
+  │       ▼                                                         │
+  │  ┌──────────────────────┐                                       │
+  │  │ Check progress.json  │                                       │
+  │  └──────────┬───────────┘                                       │
+  │             │                                                   │
+  │     ┌───────┴───────┐                                           │
+  │     ▼               ▼                                           │
+  │  ┌──────┐      ┌─────────┐                                      │
+  │  │ None │      │ Exists  │                                      │
+  │  └──┬───┘      └────┬────┘                                      │
+  │     │               │                                           │
+  │     │         ┌─────┴─────┐                                     │
+  │     │         ▼           ▼                                     │
+  │     │   ┌──────────┐ ┌───────────┐                              │
+  │     │   │ status=  │ │ status=   │                              │
+  │     │   │ completed│ │ in_progress│                             │
+  │     │   └────┬─────┘ └─────┬─────┘                              │
+  │     │        │             │                                    │
+  │     ▼        ▼             ▼                                    │
+  │  ┌─────────────────┐  ┌─────────────────┐                       │
+  │  │  START FRESH    │  │  RESUME FROM    │                       │
+  │  │  - query_idx=0  │  │  - Load state   │                       │
+  │  │  - filter_idx=0 │  │  - Load hashes  │                       │
+  │  │  - counter=0    │  │  - Continue     │                       │
+  │  └─────────────────┘  └─────────────────┘                       │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ---
+  New File: progress_tracker.py
+
+  Class: ProgressTracker
+
+  Attributes:
+  ├── progress_file: str  (default: "progress.json")
+  ├── status: str  ("in_progress" | "completed")
+  ├── query_index: int
+  ├── filter_index: int
+  ├── completed: List[Tuple[int, int]]
+  ├── seen_hashes: Set[str]
+  ├── image_counter: int
+  ├── stats: Dict
+
+  Methods:
+  ├── load() → bool
+  │   └── Returns True if resuming, False if starting fresh
+  │
+  ├── save()
+  │   └── Write current state to progress.json
+  │
+  ├── mark_combination_complete(query_idx, filter_idx)
+  │   └── Add to completed list, update position, save
+  │
+  ├── mark_finished()
+  │   └── Set status="completed", save
+  │
+  ├── is_combination_done(query_idx, filter_idx) → bool
+  │   └── Check if already processed
+  │
+  ├── add_hash(hash: str)
+  │   └── Add to seen_hashes set
+  │
+  ├── is_hash_seen(hash: str) → bool
+  │   └── Check for duplicate
+  │
+  ├── increment_counter() → int
+  │   └── Return next image number
+  │
+  └── get_resume_point() → Tuple[int, int]
+      └── Return (query_index, filter_index) to resume from
+
+  ---
+  Updated File Structure
+
+  pothole-scraper/
+  ├── .env                 # API credentials
+  ├── .env.example
+  ├── config.py            # Configuration
+  ├── api_manager.py       # Key rotation
+  ├── progress_tracker.py  # NEW: Checkpoint/resume system
+  ├── searcher.py          # API search
+  ├── downloader.py        # Download + dedup (uses ProgressTracker)
+  ├── utils.py             # Helpers
+  ├── main.py              # Orchestration
+  ├── queries.txt          # User queries
+  ├── requirements.txt
+  ├── images/              # Output
+  └── progress.json        # AUTO-GENERATED: Progress state
+
+  ---
+  Integration with Existing Components
+
+  downloader.py (Updated)
+
+  Changes:
+  - Accept ProgressTracker instance
+  - Use tracker.is_hash_seen() instead of local set
+  - Use tracker.add_hash() to persist hashes
+  - Use tracker.increment_counter() for image numbering
+
+  main.py (Updated)
+
+  Changes:
+  - Initialize ProgressTracker at start
+  - Call tracker.load() to check resume state
+  - Skip completed combinations using tracker.is_combination_done()
+  - Call tracker.mark_combination_complete() after each combination
+  - Call tracker.save() periodically and on quota exhaustion
+  - Call tracker.mark_finished() when all done
+  - Add --fresh flag to force start from beginning
+
+  ---
+  CLI Options (Updated)
+
+  | Option       | Description                            | Default  |
+  |--------------|----------------------------------------|----------|
+  | --queries    | Path to queries file                   | Required |
+  | --count      | Max images per filter combination      | 100      |
+  | --output     | Output directory                       | ./images |
+  | --prefix     | Filename prefix                        | pothole  |
+  | --no-filters | Skip all filters                       | False    |
+  | --date-only  | Use only date filters                  | False    |
+  | --size-only  | Use only size filters                  | False    |
+  | --fresh      | NEW: Ignore progress.json, start fresh | False    |
+
+  ---
+  Expected Output (Resume Scenario)
+
+  First Run (Quota Exhausted)
+
+  $ python main.py --queries queries.txt --count 50
+
+  Loading 2 API key pairs...
+  Loading queries from queries.txt... Found 3 queries
+  No previous progress found. Starting fresh.
+
+  ══════════════════════════════════════════════════════════════
+  [Query 1/3] "real images of pothole"
+  ══════════════════════════════════════════════════════════════
+
+  [Filter 1/16] dateRestrict=d30, imgSize=large
+    Saved: 45 | Duplicates: 5
+
+  [Filter 2/16] dateRestrict=d30, imgSize=xlarge
+    Saved: 38 | Duplicates: 12
+
+  ...
+
+  [!] All API keys exhausted!
+  [!] Saving progress to progress.json...
+
+  ══════════════════════════════════════════════════════════════
+  PAUSED - QUOTA EXHAUSTED
+  ══════════════════════════════════════════════════════════════
+    Progress saved: Query 2, Filter 3
+    Images saved so far: 423
+    Run again tomorrow to continue.
+  ══════════════════════════════════════════════════════════════
+
+  Second Run (Resume)
+
+  $ python main.py --queries queries.txt --count 50
+
+  Loading 2 API key pairs...
+  Loading queries from queries.txt... Found 3 queries
+
+  ══════════════════════════════════════════════════════════════
+  RESUMING FROM PREVIOUS SESSION
+  ══════════════════════════════════════════════════════════════
+    Last run: 2026-01-03 10:30:00
+    Progress: Query 2/3, Filter 3/16
+    Images saved: 423
+    Hashes loaded: 423 (for deduplication)
+  ══════════════════════════════════════════════════════════════
+
+  [Query 2/3] "pothole road damage" (resuming)
+
+  [Filter 3/16] dateRestrict=d30, imgSize=xxlarge (resuming)
+    Saved: 41 | Duplicates: 9
+
+  [Filter 4/16] dateRestrict=d30, imgSize=huge
+    Saved: 35 | Duplicates: 15
+
+  ...
+
+  ══════════════════════════════════════════════════════════════
+  COMPLETED
+  ══════════════════════════════════════════════════════════════
+    Total images saved: 892
+    Duplicates skipped: 308
+    Status: Finished all queries and combinations
+  ══════════════════════════════════════════════════════════════
+
+  Third Run (Already Complete)
+
+  $ python main.py --queries queries.txt --count 50
+
+  Loading queries from queries.txt... Found 3 queries
+
+  ══════════════════════════════════════════════════════════════
+  PREVIOUS SESSION COMPLETED
+  ══════════════════════════════════════════════════════════════
+    Completed: 2026-01-03 14:30:00
+    Images saved: 892
+
+  Starting fresh run...
+  ══════════════════════════════════════════════════════════════
+
+  ---
+  Summary of All Changes
+
+  | File                | Status    | Changes                                     |
+  |---------------------|-----------|---------------------------------------------|
+  | config.py           | Update    | Multi-key loading, filter constants         |
+  | api_manager.py      | New       | Key rotation, quota tracking                |
+  | progress_tracker.py | New       | Checkpoint/resume system                    |
+  | searcher.py         | Update    | Filter params, rotation integration         |
+  | downloader.py       | Update    | Use ProgressTracker for hashes/counter      |
+  | main.py             | Update    | Resume logic, filter loops, new CLI options |
+  | .env.example        | Update    | Multi-key template                          |
+  | utils.py            | No change | -                                           |
+
+  ---
+  Please confirm this updated plan and I will begin implementation.
+
+> Okay, implement. 
+
+● Read(config.py)
+  ⎿  Read 29 lines
+
+● Write(config.py)
+  ⎿  Added 48 lines, removed 8 lines                                     
+       6  # Load environment variables from .env file                    
+       7  load_dotenv()                                                  
+       8                                                                 
+       9 -# Google API credentials                                       
+      10 -API_KEY = os.getenv("API_KEY")                                 
+      11 -CX = os.getenv("CX")                                           
+      12 -                                                               
+       9  # API settings                                                 
+      10  BASE_URL = "https://www.googleapis.com/customsearch/v1"        
+      11  RESULTS_PER_PAGE = 10                                          
+     ...
+      18  # Default settings                                             
+      19  DEFAULT_OUTPUT_DIR = "./images"                                
+      20  DEFAULT_COUNT = 100                                            
+      21 +PROGRESS_FILE = "progress.json"                                
+      22                                                                 
+      23 +# Filter configurations                                        
+      24 +DATE_FILTERS = ['d30', 'm6', 'y1', 'y5']                       
+      25 +SIZE_FILTERS = ['large', 'xlarge', 'xxlarge', 'huge']          
+      26                                                                 
+      27 +                                                               
+      28 +def load_api_credentials():                                    
+      29 +    """                                                        
+      30 +    Load multiple API key and CX pairs from environment        
+         +variables.                                                     
+      31 +                                                               
+      32 +    Looks for API_KEY_1, CX_1, API_KEY_2, CX_2, etc.           
+      33 +    Falls back to API_KEY, CX if numbered versions not found.  
+      34 +                                                               
+      35 +    Returns:                                                   
+      36 +        List of tuples: [(api_key, cx), ...]                   
+      37 +    """                                                        
+      38 +    credentials = []                                           
+      39 +                                                               
+      40 +    # Try numbered credentials first (API_KEY_1, CX_1, etc.)   
+      41 +    index = 1                                                  
+      42 +    while True:                                                
+      43 +        api_key = os.getenv(f"API_KEY_{index}")                
+      44 +        cx = os.getenv(f"CX_{index}")                          
+      45 +                                                               
+      46 +        if api_key and cx:                                     
+      47 +            credentials.append((api_key, cx))                  
+      48 +            index += 1                                         
+      49 +        else:                                                  
+      50 +            break                                              
+      51 +                                                               
+      52 +    # Fall back to single API_KEY, CX if no numbered ones      
+         +found                                                          
+      53 +    if not credentials:                                        
+      54 +        api_key = os.getenv("API_KEY")                         
+      55 +        cx = os.getenv("CX")                                   
+      56 +        if api_key and cx:                                     
+      57 +            credentials.append((api_key, cx))                  
+      58 +                                                               
+      59 +    return credentials                                         
+      60 +                                                               
+      61 +                                                               
+      62  def validate_config():                                         
+      63      """Validate that required configuration is present."""     
+      64 -    if not API_KEY:                                            
+      65 -        raise ValueError("API_KEY not found. Please set it in  
+         -.env file.")                                                   
+      66 -    if not CX:                                                 
+      67 -        raise ValueError("CX not found. Please set it in .env  
+         -file.")                                                        
+      64 +    credentials = load_api_credentials()                       
+      65 +                                                               
+      66 +    if not credentials:                                        
+      67 +        raise ValueError(                                      
+      68 +            "No API credentials found. Please set API_KEY_1    
+         +and CX_1 "                                                     
+      69 +            "(or API_KEY and CX) in .env file."                
+      70 +        )                                                      
+      71 +                                                               
+      72 +    return credentials                                         
+
+● Write(api_manager.py)
+  ⎿  Wrote 1 lines to api_manager.py                                   
+     """API key manager with rotation and quota tracking."""
+     class APIManager:
+         """Manages multiple API keys with automatic rotation on quota 
+     exhaustion."""
+         def __init__(self, credentials: list[tuple[str, str]]):
+             """
+             Initialize the API manager.
+
+● Write(progress_tracker.py)
+  ⎿  Wrote 1 lines to progress_tracker.py                         
+     """Progress tracking and checkpoint/resume system."""
+     import json
+     import os
+     from datetime import datetime
+     from config import PROGRESS_FILE
+     class ProgressTracker:
+         """Tracks progress and enables resume from checkpoint."""
+
+● Read(searcher.py)
+  ⎿  Read 93 lines
+
+● Write(searcher.py)
+  ⎿  Added 102 lines, removed 30 lines                                   
+        1  """Google Custom Search API integration for image search."""  
+        2                                                                
+        3  import requests                                               
+        4 -from config import API_KEY, CX, BASE_URL, RESULTS_PER_PAGE,   
+          -MAX_RESULTS_PER_QUERY                                         
+        4 +from config import BASE_URL, RESULTS_PER_PAGE,                
+          +MAX_RESULTS_PER_QUERY, DATE_FILTERS, SIZE_FILTERS             
+        5 +from api_manager import APIManager                            
+        6                                                                
+        7                                                                
+        8 -def search_images(query: str, count: int = 100) ->            
+          -list[dict]:                                                   
+        8 +class QuotaExhaustedError(Exception):                         
+        9 +    """Raised when API quota is exhausted."""                 
+       10 +    pass                                                      
+       11 +                                                              
+       12 +                                                              
+       13 +class AllKeysExhaustedError(Exception):                       
+       14 +    """Raised when all API keys are exhausted."""             
+       15 +    pass                                                      
+       16 +                                                              
+       17 +                                                              
+       18 +def generate_filter_combinations(                             
+       19 +    use_date_filters: bool = True,                            
+       20 +    use_size_filters: bool = True                             
+       21 +) -> list[dict]:                                              
+       22      """                                                       
+       23 +    Generate all filter combinations.                         
+       24 +                                                              
+       25 +    Args:                                                     
+       26 +        use_date_filters: Whether to include date filters     
+       27 +        use_size_filters: Whether to include size filters     
+       28 +                                                              
+       29 +    Returns:                                                  
+       30 +        List of filter dicts, e.g., [{'dateRestrict': 'd30',  
+          +'imgSize': 'large'}, ...]                                     
+       31 +    """                                                       
+       32 +    date_filters = DATE_FILTERS if use_date_filters else      
+          +[None]                                                        
+       33 +    size_filters = SIZE_FILTERS if use_size_filters else      
+          +[None]                                                        
+       34 +                                                              
+       35 +    combinations = []                                         
+       36 +    for date_filter in date_filters:                          
+       37 +        for size_filter in size_filters:                      
+       38 +            combo = {}                                        
+       39 +            if date_filter:                                   
+       40 +                combo['dateRestrict'] = date_filter           
+       41 +            if size_filter:                                   
+       42 +                combo['imgSize'] = size_filter                
+       43 +            combinations.append(combo)                        
+       44 +                                                              
+       45 +    return combinations                                       
+       46 +                                                              
+       47 +                                                              
+       48 +def search_images(                                            
+       49 +    query: str,                                               
+       50 +    api_manager: APIManager,                                  
+       51 +    filters: dict = None,                                     
+       52 +    count: int = 100                                          
+       53 +) -> tuple[list[dict], bool]:                                 
+       54 +    """                                                       
+       55      Search for images using Google Custom Search API.         
+       56                                                                
+       57      Args:                                                     
+       58          query: The search query string                        
+       59 +        api_manager: APIManager instance for credentials      
+       60 +        filters: Dict with optional 'dateRestrict' and        
+          +'imgSize' keys                                                
+       61          count: Number of images to fetch (max 100)            
+       62                                                                
+       63      Returns:                                                  
+       64 -        List of dicts containing image URL and source page    
+          -URL                                                           
+       64 +        Tuple of (results list, quota_exhausted flag)         
+       65 +                                                              
+       66 +    Raises:                                                   
+       67 +        AllKeysExhaustedError: When all API keys are          
+          +exhausted                                                     
+       68      """                                                       
+       69 -    # Clamp count to API limits                               
+       69      count = min(count, MAX_RESULTS_PER_QUERY)                 
+       70 +    filters = filters or {}                                   
+       71                                                                
+       72      results = []                                              
+       73      start_index = 1                                           
+       74                                                                
+       75      while len(results) < count:                               
+       76 -        # Calculate how many results to request               
+       76 +        if not api_manager.has_available_keys():              
+       77 +            raise AllKeysExhaustedError("All API keys have    
+          +been exhausted")                                              
+       78 +                                                              
+       79 +        api_key, cx = api_manager.get_current_credentials()   
+       80          num_to_fetch = min(RESULTS_PER_PAGE, count -          
+           len(results))                                                 
+       81                                                                
+       82          params = {                                            
+       83 -            'key': API_KEY,                                   
+       84 -            'cx': CX,                                         
+       83 +            'key': api_key,                                   
+       84 +            'cx': cx,                                         
+       85              'q': query,                                       
+       86              'searchType': 'image',                            
+       87              'start': start_index,                             
+       88              'num': num_to_fetch,                              
+       89          }                                                     
+       90                                                                
+       91 +        # Add optional filters                                
+       92 +        if 'dateRestrict' in filters:                         
+       93 +            params['dateRestrict'] = filters['dateRestrict']  
+       94 +        if 'imgSize' in filters:                              
+       95 +            params['imgSize'] = filters['imgSize']            
+       96 +                                                              
+       97          try:                                                  
+       98              response = requests.get(BASE_URL, params=params,  
+           timeout=30)                                                   
+       99 +                                                              
+      100 +            # Check for quota exceeded (429 or specific       
+          +error)                                                        
+      101 +            if response.status_code == 429:                   
+      102 +                print(f"\n  [!] API Key                       
+          +#{api_manager.get_current_key_number()} quota exceeded.")     
+      103 +                if api_manager.rotate_to_next():              
+      104 +                    print(f"  [>] Rotating to API Key         
+          +#{api_manager.get_current_key_number()}...")                  
+      105 +                    continue  # Retry with new key            
+      106 +                else:                                         
+      107 +                    raise AllKeysExhaustedError("All API keys 
+          + have been exhausted")                                        
+      108 +                                                              
+      109 +            # Check for other quota-related errors in         
+          +response                                                      
+      110 +            if response.status_code == 403:                   
+      111 +                try:                                          
+      112 +                    error_data = response.json()              
+      113 +                    error_reason = error_data.get('error',    
+          +{}).get('errors', [{}])[0].get('reason', '')                  
+      114 +                    if error_reason in ['dailyLimitExceeded', 
+          + 'userRateLimitExceeded', 'quotaExceeded']:                   
+      115 +                        print(f"\n  [!] API Key               
+          +#{api_manager.get_current_key_number()} quota exceeded        
+          +({error_reason}).")                                           
+      116 +                        if api_manager.rotate_to_next():      
+      117 +                            print(f"  [>] Rotating to API Key 
+          + #{api_manager.get_current_key_number()}...")                 
+      118 +                            continue                          
+      119 +                        else:                                 
+      120 +                            raise AllKeysExhaustedError("All  
+          +API keys have been exhausted")                                
+      121 +                except (ValueError, KeyError):                
+      122 +                    pass                                      
+      123 +                                                              
+      124              response.raise_for_status()                       
+      125              data = response.json()                            
+      126                                                                
+     ...
+      50                      'title': item.get('title', ''),            
+      51                  })                                             
+      52                                                                 
+      53 -            # Move to next page                                
+      53              start_index += RESULTS_PER_PAGE                    
+      54                                                                 
+      55 -            # Check if we've reached the end                   
+      55              if start_index > MAX_RESULTS_PER_QUERY:            
+      56                  break                                          
+      57                                                                 
+     ...
+      67      return results                                             
+      68                                                                 
+      69                                                                 
+      70 -def fetch_all_images(queries: list[str], count_per_query: int  
+         -= 100) -> list[dict]:                                          
+      71 -    """                                                        
+      72 -    Fetch images for multiple queries.                         
+      70 +def format_filter_display(filters: dict) -> str:               
+      71 +    """Format filters for display."""                          
+      72 +    if not filters:                                            
+      73 +        return "no filters"                                    
+      74                                                                 
+      75 -    Args:                                                      
+      76 -        queries: List of search query strings                  
+      77 -        count_per_query: Number of images to fetch per query   
+      75 +    parts = []                                                 
+      76 +    if 'dateRestrict' in filters:                              
+      77 +                                                               
+         +parts.append(f"dateRestrict={filters['dateRestrict']}")        
+      78 +    if 'imgSize' in filters:                                   
+      79 +        parts.append(f"imgSize={filters['imgSize']}")          
+      80                                                                 
+      81 -    Returns:                                                   
+      82 -        Aggregated list of image metadata                      
+      83 -    """                                                        
+      84 -    all_results = []                                           
+      85 -                                                               
+      86 -    for i, query in enumerate(queries, 1):                     
+      87 -        print(f"\n[{i}/{len(queries)}] \"{query}\"")           
+      88 -        print(f"  Fetching up to {count_per_query} images...") 
+      89 -                                                               
+      90 -        results = search_images(query, count_per_query)        
+      91 -        print(f"  Found: {len(results)} images")               
+      92 -                                                               
+      93 -        all_results.extend(results)                            
+      94 -                                                               
+      95 -    return all_results                                         
+      81 +    return ", ".join(parts) if parts else "no filters"         
+
+● Read(downloader.py)
+  ⎿  Read 151 lines
+
+● Write(downloader.py)
+  ⎿  Added 45 lines, removed 21 lines                                    
+       3  import os                                                      
+       4  import requests                                                
+       5  from utils import compute_hash, sanitize_filename,             
+          get_file_extension                                             
+       6 +from progress_tracker import ProgressTracker                   
+       7                                                                 
+       8                                                                 
+       9  class ImageDownloader:                                         
+      10      """Downloads images with content-based deduplication."""   
+      11                                                                 
+      12 -    def __init__(self, output_dir: str, prefix: str =          
+         -"pothole"):                                                    
+      12 +    def __init__(                                              
+      13 +        self,                                                  
+      14 +        output_dir: str,                                       
+      15 +        progress_tracker: ProgressTracker,                     
+      16 +        prefix: str = "pothole"                                
+      17 +    ):                                                         
+      18          """                                                    
+      19          Initialize the downloader.                             
+      20                                                                 
+      21          Args:                                                  
+      22              output_dir: Directory to save images               
+      23 +            progress_tracker: ProgressTracker instance for     
+         +state persistence                                              
+      24              prefix: Prefix for image filenames                 
+      25          """                                                    
+      26          self.output_dir = output_dir                           
+      27 +        self.tracker = progress_tracker                        
+      28          self.prefix = prefix                                   
+      29 -        self.seen_hashes = set()                               
+      30 -        self.counter = 0                                       
+      31 -        self.stats = {                                         
+      29 +                                                               
+      30 +        # Local stats for current batch                        
+      31 +        self.batch_stats = {                                   
+      32              'saved': 0,                                        
+      33              'duplicates': 0,                                   
+      34              'errors': 0,                                       
+     ...
+      66          # Compute hash for deduplication                       
+      67          content_hash = compute_hash(content)                   
+      68                                                                 
+      69 -        # Check for duplicate                                  
+      70 -        if content_hash in self.seen_hashes:                   
+      71 -            self.stats['duplicates'] += 1                      
+      69 +        # Check for duplicate                                  
+         + (using tracker's persistent hash set)                         
+      70 +        if self.tracker.is_hash_seen(content_hash):            
+      71 +            self.batch_stats['duplicates'] += 1                
+      72 +            self.tracker.increment_duplicates()                
+      73              return None                                        
+      74                                                                 
+      75 -        # Mark as seen                                         
+      76 -        self.seen_hashes.add(content_hash)                     
+      75 +        # Mark as seen (persisted in tracker)                  
+      76 +        self.tracker.add_hash(content_hash)                    
+      77                                                                 
+      78 -        # Generate filename                                    
+      79 -        self.counter += 1                                      
+      78 +        # Generate filename using tracker's counter            
+      79 +        counter = self.tracker.increment_counter()             
+      80          extension = get_file_extension(url, content_type)      
+      81          sanitized_url = sanitize_filename(url)                 
+      82 -        filename = f"{self.prefix}_{self.                      
+         -counter:03d}_scraped_from_{sanitized_url}{extension}"          
+      82 +        filename = f"{self.prefix}_{                           
+         +counter:03d}_scraped_from_{sanitized_url}{extension}"          
+      83                                                                 
+      84          # Save to disk                                         
+      85          filepath = os.path.join(self.output_dir, filename)     
+      86          try:                                                   
+      87              with open(filepath, 'wb') as f:                    
+      88                  f.write(content)                               
+      89 -            self.stats['saved'] += 1                           
+      89 +            self.batch_stats['saved'] += 1                     
+      90 +            self.tracker.increment_saved()                     
+      91              return filename                                    
+      92          except IOError:                                        
+      93 -            self.stats['errors'] += 1                          
+      93 +            self.batch_stats['errors'] += 1                    
+      94 +            self.tracker.increment_errors()                    
+      95              return None                                        
+      96                                                                 
+      97      def process_image(self, image_data: dict) -> bool:         
+     ...
+      103          """                                                   
+      104          url = image_data.get('url')                           
+      105          if not url:                                           
+      106 -            self.stats['errors'] += 1                         
+      106 +            self.batch_stats['errors'] += 1                   
+      107 +            self.tracker.increment_errors()                   
+      108              return False                                      
+      109                                                                
+      110          # Download                                            
+      111          result = self.download_image(url)                     
+      112          if result is None:                                    
+      113 -            self.stats['errors'] += 1                         
+      113 +            self.batch_stats['errors'] += 1                   
+      114 +            self.tracker.increment_errors()                   
+      115              return False                                      
+      116                                                                
+      117          content, content_type = result                        
+     ...
+      127              show_progress: Whether to show progress bar       
+      128                                                                
+      129          Returns:                                              
+      130 -            Statistics dict                                   
+      130 +            Batch statistics dict                             
+      131          """                                                   
+      132          total = len(images)                                   
+      133                                                                
+      134 +        if total == 0:                                        
+      135 +            return self.batch_stats.copy()                    
+      136 +                                                              
+      137          for i, image_data in enumerate(images, 1):            
+      138              self.process_image(image_data)                    
+      139                                                                
+     ...
+      143          if show_progress:                                     
+      144              print()  # New line after progress bar            
+      145                                                                
+      146 -        return self.stats.copy()                              
+      146 +        return self.batch_stats.copy()                        
+      147                                                                
+      148 -    def get_stats(self) -> dict:                              
+      149 -        """Get current statistics."""                         
+      150 -        return self.stats.copy()                              
+      148 +    def reset_batch_stats(self):                              
+      149 +        """Reset batch statistics for new batch."""           
+      150 +        self.batch_stats = {                                  
+      151 +            'saved': 0,                                       
+      152 +            'duplicates': 0,                                  
+      153 +            'errors': 0,                                      
+      154 +        }                                                     
+      155 +                                                              
+      156 +    def get_batch_stats(self) -> dict:                        
+      157 +        """Get current batch statistics."""                   
+      158 +        return self.batch_stats.copy()                        
+
+● Write(main.py)
+  ⎿  Added 189 lines, removed 30 lines                                   
+       2  Pothole Image Scraper                                          
+       3                                                                 
+       4  A tool to search and download pothole images using Google      
+          Custom Search API                                              
+       5 -with automatic deduplication.                                  
+       5 +with automatic deduplication, multi-key rotation, and resume   
+         +support.                                                       
+       6  """                                                            
+       7                                                                 
+       8  import argparse                                                
+       9  import sys                                                     
+      10 +import os                                                      
+      11  from config import validate_config, DEFAULT_OUTPUT_DIR,        
+          DEFAULT_COUNT                                                  
+      12  from utils import read_queries_from_file                       
+      13 -from searcher import fetch_all_images                          
+      13 +from api_manager import APIManager                             
+      14 +from progress_tracker import ProgressTracker                   
+      15 +from searcher import (                                         
+      16 +    search_images,                                             
+      17 +    generate_filter_combinations,                              
+      18 +    format_filter_display,                                     
+      19 +    AllKeysExhaustedError                                      
+      20 +)                                                              
+      21  from downloader import ImageDownloader                         
+      22                                                                 
+      23                                                                 
+     ...
+      22  Examples:                                                      
+      23    python main.py --queries queries.txt                         
+      24    python main.py --queries queries.txt --count 50 --output     
+          ./my_images                                                    
+      25 +  python main.py --queries queries.txt --no-filters            
+      26 +  python main.py --queries queries.txt --fresh                 
+      27          '''                                                    
+      28      )                                                          
+      29                                                                 
+     ...
+      35          '--count',                                             
+      36          type=int,                                              
+      37          default=DEFAULT_COUNT,                                 
+      38 -        help=f'Maximum images to fetch per query               
+         -(default: {DEFAULT_COUNT}, max: 100)'                          
+      38 +        help=f'Maximum images to fetch per filter combination  
+         +(default: {DEFAULT_COUNT}, max: 100)'                          
+      39      )                                                          
+      40                                                                 
+      41      parser.add_argument(                                       
+     ...
+       50          help='Prefix for image filenames (default: pothole)'  
+       51      )                                                         
+       52                                                                
+       53 +    parser.add_argument(                                      
+       54 +        '--no-filters',                                       
+       55 +        action='store_true',                                  
+       56 +        help='Skip all filters (use only base queries)'       
+       57 +    )                                                         
+       58 +                                                              
+       59 +    parser.add_argument(                                      
+       60 +        '--date-only',                                        
+       61 +        action='store_true',                                  
+       62 +        help='Use only date filters, skip size filters'       
+       63 +    )                                                         
+       64 +                                                              
+       65 +    parser.add_argument(                                      
+       66 +        '--size-only',                                        
+       67 +        action='store_true',                                  
+       68 +        help='Use only size filters, skip date filters'       
+       69 +    )                                                         
+       70 +                                                              
+       71 +    parser.add_argument(                                      
+       72 +        '--fresh',                                            
+       73 +        action='store_true',                                  
+       74 +        help='Ignore progress.json and start fresh'           
+       75 +    )                                                         
+       76 +                                                              
+       77      return parser.parse_args()                                
+       78                                                                
+       79                                                                
+       80 +def print_header(text: str):                                  
+       81 +    """Print a section header."""                             
+       82 +    print("\n" + "=" * 60)                                    
+       83 +    print(text)                                               
+       84 +    print("=" * 60)                                           
+       85 +                                                              
+       86 +                                                              
+       87 +def print_resume_info(tracker: ProgressTracker):              
+       88 +    """Print resume information."""                           
+       89 +    info = tracker.get_progress_display()                     
+       90 +    print_header("RESUMING FROM PREVIOUS SESSION")            
+       91 +    print(f"  Last run: {info['updated_at']}")                
+       92 +    print(f"  Progress: Query {info['query_index'] + 1},      
+          +Filter {info['filter_index'] + 1}")                           
+       93 +    print(f"  Combinations completed:                         
+          +{info['completed_count']}/{info['total_combinations']}")      
+       94 +    print(f"  Images saved: {info['images_saved']}")          
+       95 +    print(f"  Hashes loaded: {info['hashes_loaded']} (for     
+          +deduplication)")                                              
+       96 +                                                              
+       97 +                                                              
+       98 +def print_completion_info(tracker: ProgressTracker):          
+       99 +    """Print previous completion info."""                     
+      100 +    info = tracker.get_progress_display()                     
+      101 +    print_header("PREVIOUS SESSION COMPLETED")                
+      102 +    print(f"  Completed: {info['updated_at']}")               
+      103 +    print(f"  Images saved: {info['images_saved']}")          
+      104 +    print("\nStarting fresh run...")                          
+      105 +                                                              
+      106 +                                                              
+      107  def main():                                                   
+      108      """Main entry point."""                                   
+      109      args = parse_args()                                       
+      110                                                                
+      111 -    # Validate configuration                                  
+      111 +    # Validate configuration and get credentials              
+      112      print("Validating configuration...")                      
+      113      try:                                                      
+      114 -        validate_config()                                     
+      114 +        credentials = validate_config()                       
+      115 +        print(f"Loaded {len(credentials)} API key pair(s)")   
+      116      except ValueError as e:                                   
+      117          print(f"Configuration error: {e}")                    
+      118          sys.exit(1)                                           
+      119                                                                
+      120 +    # Initialize API manager                                  
+      121 +    api_manager = APIManager(credentials)                     
+      122 +                                                              
+      123      # Read queries from file                                  
+      124      print(f"Loading queries from {args.queries}...")          
+      125      try:                                                      
+     ...
+       82                                                                
+       83      print(f"Found {len(queries)} queries")                    
+       84                                                                
+       85 +    # Determine filter combinations                           
+       86 +    use_date = not args.no_filters and not args.size_only     
+       87 +    use_size = not args.no_filters and not args.date_only     
+       88 +                                                              
+       89 +    if args.no_filters:                                       
+       90 +        filter_combinations = [{}]  # Single empty filter     
+       91 +    else:                                                     
+       92 +        filter_combinations =                                 
+          +generate_filter_combinations(use_date, use_size)              
+       93 +                                                              
+       94 +    total_combinations = len(queries) *                       
+          +len(filter_combinations)                                      
+       95 +    print(f"Filter combinations per query:                    
+          +{len(filter_combinations)}")                                  
+       96 +    print(f"Total combinations: {total_combinations}")        
+       97 +                                                              
+       98 +    # Initialize progress tracker                             
+       99 +    tracker = ProgressTracker()                               
+      100 +                                                              
+      101 +    # Handle fresh start or resume                            
+      102 +    if args.fresh:                                            
+      103 +        # Delete existing progress file                       
+      104 +        if os.path.exists(tracker.progress_file):             
+      105 +            os.remove(tracker.progress_file)                  
+      106 +        print("Starting fresh (--fresh flag used)")           
+      107 +        is_resuming = False                                   
+      108 +    else:                                                     
+      109 +        is_resuming = tracker.load()                          
+      110 +                                                              
+      111 +    # Set session info                                        
+      112 +    tracker.set_session_info(args.queries, len(queries),      
+          +total_combinations)                                           
+      113 +                                                              
+      114 +    # Show resume or completion info                          
+      115 +    if is_resuming:                                           
+      116 +        print_resume_info(tracker)                            
+      117 +    elif tracker.status == 'completed' and not args.fresh:    
+      118 +        print_completion_info(tracker)                        
+      119 +        # Reset for fresh run                                 
+      120 +        tracker = ProgressTracker()                           
+      121 +        tracker.set_session_info(args.queries, len(queries),  
+          +total_combinations)                                           
+      122 +                                                              
+      123      # Clamp count to valid range                              
+      124      count = min(max(1, args.count), 100)                      
+      125                                                                
+      126 -    # Fetch image metadata for all queries                    
+      127 -    print("\n" + "=" * 50)                                    
+      128 -    print("PHASE 1: Searching for images")                    
+      129 -    print("=" * 50)                                           
+      126 +    # Initialize downloader with tracker                      
+      127 +    downloader = ImageDownloader(args.output, tracker,        
+          +prefix=args.prefix)                                           
+      128                                                                
+      129 -    all_images = fetch_all_images(queries, count)             
+      129 +    # Main processing loop                                    
+      130 +    print_header("PROCESSING")                                
+      131                                                                
+      132 -    if not all_images:                                        
+      133 -        print("\nNo images found. Check your queries and API  
+          -credentials.")                                                
+      134 -        sys.exit(1)                                           
+      132 +    all_keys_exhausted = False                                
+      133 +    filter_counter = 0                                        
+      134                                                                
+      135 -    print(f"\nTotal images found: {len(all_images)}")         
+      135 +    try:                                                      
+      136 +        for query_idx, query in enumerate(queries):           
+      137 +            print(f"\n{'─' * 60}")                            
+      138 +            print(f"[Query {query_idx + 1}/{len(queries)}]    
+          +\"{query}\"")                                                 
+      139 +            print(f"{'─' * 60}")                              
+      140                                                                
+      141 -    # Download and deduplicate                                
+      142 -    print("\n" + "=" * 50)                                    
+      143 -    print("PHASE 2: Downloading and deduplicating")           
+      144 -    print("=" * 50)                                           
+      141 +            for filter_idx, filters in                        
+          +enumerate(filter_combinations):                               
+      142 +                filter_counter += 1                           
+      143                                                                
+      144 -    downloader = ImageDownloader(args.output,                 
+          -prefix=args.prefix)                                           
+      145 -    stats = downloader.process_all(all_images)                
+      144 +                # Skip if already completed                   
+      145 +                if tracker.is_combination_done(query_idx,     
+          +filter_idx):                                                  
+      146 +                    print(f"\n[Filter {filter_idx +           
+          +1}/{len(filter_combinations)}]                                
+          +{format_filter_display(filters)}")                            
+      147 +                    print("  Skipped (already completed)")    
+      148 +                    continue                                  
+      149                                                                
+      150 -    # Print summary                                           
+      151 -    print("\n" + "=" * 50)                                    
+      152 -    print("SUMMARY")                                          
+      153 -    print("=" * 50)                                           
+      154 -    print(f"  Total images found:    {len(all_images)}")      
+      155 -    print(f"  Unique images saved:   {stats['saved']}")       
+      156 -    print(f"  Duplicates skipped:    {stats['duplicates']}")  
+      157 -    print(f"  Errors:                {stats['errors']}")      
+      158 -    print(f"  Output directory:      {args.output}")          
+      159 -    print("=" * 50)                                           
+      150 +                # Update position                             
+      151 +                tracker.update_position(query_idx,            
+          +filter_idx)                                                   
+      152                                                                
+      153 +                print(f"\n[Filter {filter_idx +               
+          +1}/{len(filter_combinations)}]                                
+          +{format_filter_display(filters)}")                            
+      154 +                print(f"  Using API Key                       
+          +#{api_manager.get_current_key_number()}")                     
+      155                                                                
+      156 +                # Search for images                           
+      157 +                try:                                          
+      158 +                    images = search_images(query,             
+          +api_manager, filters, count)                                  
+      159 +                except AllKeysExhaustedError:                 
+      160 +                    print("\n[!] All API keys exhausted!")    
+      161 +                    all_keys_exhausted = True                 
+      162 +                    break                                     
+      163 +                                                              
+      164 +                if not images:                                
+      165 +                    print("  No images found for this         
+          +combination")                                                 
+      166 +                                                              
+          +tracker.mark_combination_complete(query_idx, filter_idx)      
+      167 +                    tracker.save()                            
+      168 +                    continue                                  
+      169 +                                                              
+      170 +                print(f"  Found: {len(images)} images")       
+      171 +                                                              
+      172 +                # Download images                             
+      173 +                downloader.reset_batch_stats()                
+      174 +                batch_stats = downloader.process_all(images)  
+      175 +                                                              
+      176 +                print(f"  Saved: {batch_stats['saved']} |     
+          +Duplicates: {batch_stats['duplicates']} | Errors:             
+          +{batch_stats['errors']}")                                     
+      177 +                                                              
+      178 +                # Mark as complete and save progress          
+      179 +                tracker.mark_combination_complete(query_idx,  
+          +filter_idx)                                                   
+      180 +                tracker.save()                                
+      181 +                                                              
+      182 +            if all_keys_exhausted:                            
+      183 +                break                                         
+      184 +                                                              
+      185 +    except KeyboardInterrupt:                                 
+      186 +        print("\n\n[!] Interrupted by user")                  
+      187 +        print("[!] Saving progress...")                       
+      188 +        tracker.save()                                        
+      189 +                                                              
+      190 +    # Final summary                                           
+      191 +    stats = tracker.get_stats()                               
+      192 +                                                              
+      193 +    if all_keys_exhausted:                                    
+      194 +        print_header("PAUSED - QUOTA EXHAUSTED")              
+      195 +        print(f"  Progress saved: Query {tracker.query_index  
+          ++ 1}, Filter {tracker.filter_index + 1}")                     
+      196 +        print(f"  Combinations completed:                     
+          +{len(tracker.completed)}/{total_combinations}")               
+      197 +        print(f"  Images saved so far:                        
+          +{stats['images_saved']}")                                     
+      198 +        print(f"  Run again later to continue.")              
+      199 +    else:                                                     
+      200 +        # Mark as finished                                    
+      201 +        tracker.mark_finished()                               
+      202 +        print_header("COMPLETED")                             
+      203 +                                                              
+      204 +    print_header("SUMMARY")                                   
+      205 +    print(f"  Total combinations: {total_combinations}")      
+      206 +    print(f"  Completed: {len(tracker.completed)}")           
+      207 +    print(f"  Unique images saved: {stats['images_saved']}")  
+      208 +    print(f"  Duplicates skipped:                             
+          +{stats['duplicates_skipped']}")                               
+      209 +    print(f"  Errors: {stats['errors']}")                     
+      210 +    print(f"  API keys used:                                  
+          +{api_manager.get_status()['exhausted_count'] + 1} of          
+          +{api_manager.get_total_keys()}")                              
+      211 +    print(f"  Output directory: {args.output}")               
+      212 +    print("=" * 60)                                           
+      213 +                                                              
+      214 +                                                              
+      215  if __name__ == '__main__':                                    
+      216      main()                                                    
+
+● Write(.env.example)
+  ⎿  Added 20 lines, removed 2 lines                                     
+       2  # Get your API key from:                                       
+          https://console.developers.google.com/apis/credentials         
+       3  # Get your CX from: https://cse.google.com/cse/all             
+       4                                                                 
+       5 -API_KEY=your_api_key_here                                      
+       6 -CX=your_custom_search_engine_id_here                           
+       5 +# You can add multiple API key + CX pairs for quota rotation   
+       6 +# Each pair uses a separate Google Cloud Project quota (100    
+         +queries/day each)                                              
+       7 +                                                               
+       8 +# API Key and CX Pair 1                                        
+       9 +API_KEY_1=your_first_api_key_here                              
+      10 +CX_1=your_first_cx_id_here                                     
+      11 +                                                               
+      12 +# API Key and CX Pair 2 (optional)                             
+      13 +API_KEY_2=your_second_api_key_here                             
+      14 +CX_2=your_second_cx_id_here                                    
+      15 +                                                               
+      16 +# API Key and CX Pair 3 (optional)                             
+      17 +API_KEY_3=your_third_api_key_here                              
+      18 +CX_3=your_third_cx_id_here                                     
+      19 +                                                               
+      20 +# Add more pairs as needed (API_KEY_4, CX_4, etc.)             
+      21 +                                                               
+      22 +# Note: If you only have one API key, you can also use:        
+      23 +# API_KEY=your_api_key_here                                    
+      24 +# CX=your_cx_id_here                                           
+
+● Implementation complete. Here's the updated project:
+
+  ---
+  Updated File Structure
+
+  F:\Codes\Crack Scrapper\
+  ├── .env.example         # Multi-key template
+  ├── config.py            # Updated: multi-key + filter constants
+  ├── api_manager.py       # NEW: key rotation logic
+  ├── progress_tracker.py  # NEW: checkpoint/resume system
+  ├── searcher.py          # Updated: filters + rotation
+  ├── downloader.py        # Updated: uses ProgressTracker
+  ├── main.py              # Updated: full orchestration
+  ├── utils.py             # Unchanged
+  ├── queries.txt          # Your queries
+  ├── requirements.txt     # Dependencies
+  ├── images/              # Output (created automatically)
+  └── progress.json        # Auto-generated on run
+
+  ---
+  Setup
+
+  1. Create .env file
+
+  copy .env.example .env
+
+  2. Add your API credentials
+
+  # .env
+  API_KEY_1=your_first_api_key
+  CX_1=your_first_cx_id
+
+  API_KEY_2=your_second_api_key
+  CX_2=your_second_cx_id
+
+  API_KEY_3=your_third_api_key
+  CX_3=your_third_cx_id
+
+  3. Edit queries.txt
+
+  real images of pothole
+  pothole road damage photos
+  asphalt pothole pictures
+
+  ---
+  CLI Usage
+
+  # Full run with all filters (16 combinations per query)
+  python main.py --queries queries.txt
+
+  # Limit images per combination
+  python main.py --queries queries.txt --count 20
+
+  # Skip filters (only base queries)
+  python main.py --queries queries.txt --no-filters
+
+  # Date filters only (4 combinations per query)
+  python main.py --queries queries.txt --date-only
+
+  # Size filters only (4 combinations per query)
+  python main.py --queries queries.txt --size-only
+
+  # Force fresh start (ignore progress.json)
+  python main.py --queries queries.txt --fresh
+
+  # Custom output directory and prefix
+  python main.py --queries queries.txt --output ./my_images --prefix road_damage
+
+  ---
+  Features Implemented
+
+  | Feature            | Description                                               |
+  |--------------------|-----------------------------------------------------------|
+  | Multi-API Key      | Rotates through API_KEY_1/CX_1, API_KEY_2/CX_2, etc.      |
+  | Auto-Rotation      | Switches to next key when quota exceeded (429/403)        |
+  | Date Filters       | d30, m6, y1, y5 (last 30 days, 6 months, 1 year, 5 years) |
+  | Size Filters       | large, xlarge, xxlarge, huge                              |
+  | 16 Combinations    | 4 dates × 4 sizes per query                               |
+  | Resume Support     | Saves progress to progress.json                           |
+  | Deduplication      | SHA-256 hash persisted across runs                        |
+  | Keyboard Interrupt | Ctrl+C saves progress before exit                         |
+
+  ---
+  Resume Behavior
+
+  | Scenario          | Behavior                       |
+  |-------------------|--------------------------------|
+  | First run         | Starts from beginning          |
+  | Quota exhausted   | Saves progress, exits          |
+  | Run again         | Resumes from last position     |
+  | Previous complete | Starts fresh automatically     |
+  | --fresh flag      | Ignores progress, starts fresh |
+
+  ---
+  Example Output
+
+  $ python main.py --queries queries.txt --count 20
+
+  Validating configuration...
+  Loaded 3 API key pair(s)
+  Loading queries from queries.txt...
+  Found 3 queries
+  Filter combinations per query: 16
+  Total combinations: 48
+
+  ============================================================
+  PROCESSING
+  ============================================================
+
+  ────────────────────────────────────────────────────────────
+  [Query 1/3] "real images of pothole"
+  ────────────────────────────────────────────────────────────
+
+  [Filter 1/16] dateRestrict=d30, imgSize=large
+    Using API Key #1
+    Found: 20 images
+    Downloading: [████████████████████████████████████████] 20/20
+    Saved: 18 | Duplicates: 2 | Errors: 0
+
+  [Filter 2/16] dateRestrict=d30, imgSize=xlarge
+    Using API Key #1
+    Found: 20 images
+    Downloading: [████████████████████████████████████████] 20/20
+    Saved: 15 | Duplicates: 5 | Errors: 0
+
+  ...
+
+    [!] API Key #1 quota exceeded (dailyLimitExceeded).
+    [>] Rotating to API Key #2...
+
+  [Filter 9/16] dateRestrict=y1, imgSize=large
+    Using API Key #2
+    ...
+
+  ---
+  Ready to use! Let me know if you need any adjustments.
+
+> Where the images will be saved? 
+How can I modify the path so that it is saved in this folder: 
+@image/potholes folder. 
+
+● Default Save Location
+
+  Images are saved to ./images by default (defined in config.py:16).
+
+  ---
+  How to Change Output Path
+
+  Option 1: CLI Argument (Recommended)
+
+  python main.py --queries queries.txt --output ./image/potholes
+
+  Option 2: Modify Default in config.py
+
+● Update(config.py)
+  ⎿  Added 1 line, removed 1 line                                        
+      12  MAX_RESULTS_PER_QUERY = 100                                    
+      13                                                                 
+      14  # Default settings                                             
+      15 -DEFAULT_OUTPUT_DIR = "./images"                                
+      15 +DEFAULT_OUTPUT_DIR = "./image/potholes"                        
+      16  DEFAULT_COUNT = 100                                            
+      17  PROGRESS_FILE = "progress.json"                                
+      18                                                                 
+
+● Done. The default is now ./image/potholes.
+
+  ---
+  Summary
+
+  | Method            | Command                                                    |
+  |-------------------|------------------------------------------------------------|
+  | Use new default   | python main.py --queries queries.txt                       |
+  | Override with CLI | python main.py --queries queries.txt --output ./other/path |
+
+  The folder will be created automatically if it doesn't exist.
+
+
+

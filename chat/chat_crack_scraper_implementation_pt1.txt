@@ -1,0 +1,868 @@
+
+╭─── Claude Code v2.0.76 ──────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting        │
+│             Welcome back Tech Shottify!            │ started                 │
+│                                                    │ Run /init to create a … │
+│                     * ▐▛███▜▌ *                    │ ─────────────────────── │
+│                    * ▝▜█████▛▘ *                   │ Recent activity         │
+│                     *  ▘▘ ▝▝  *                    │ No recent activity      │
+│                                                    │                         │
+│    Opus 4.5 · Claude Max · tech@shottify.org's     │                         │
+│    Organization                                    │                         │
+│              F:\Codes\Crack Scrapper               │                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+> I want to use programmable search engine to search this : "real images of 
+pothole"
+--------------------
+I want google search engine to bring only images related to this search. 
+Then, I want these images to save following a naming convention such as: 
+for image 100, pothole_100_scraped_from_{scraped source url}.jpg 
+----------------------------
+I want full flexibility on how many images I want to fetch and download. 
+--------------------------
+I want the full programme to be written on python. 
+================
+First do deep research on the web and then Ultrathink to come up with a 
+solid plan which will follow all the principles of standard industrial
+practices.
+Your plan should be very minimalistic and maintain clean code principles. 
+Don't give me code snippet right now, just show the plan from high level 
+overview. After confirming it, I will move to the next stage.
+
+● I'll research Google Programmable Search Engine API for image searching first, then present a solid plan.
+
+● Web Search("Google Programmable Search Engine API image search Python 2025")
+  ⎿  Did 1 search in 26s                                                   
+
+● Web Search("Google Custom Search JSON API image results pagination limits")
+  ⎿  Did 1 search in 21s                                                   
+
+● Web Search("Google Custom Search API searchType=image Python requests
+            example")
+  ⎿  Did 1 search in 24s                                                   
+
+● Web Search("Python download images from URL best practices sanitize filename")
+  ⎿  Did 1 search in 27s                                                   
+
+● Now I have comprehensive research. Let me synthesize this into a solid plan.
+
+  ---
+  High-Level Plan: Pothole Image Scraper
+
+  Research Summary
+
+  Key API Constraints:
+  | Constraint                         | Value                      |
+  |------------------------------------|----------------------------|
+  | Results per request                | 10 max                     |
+  | Total accessible results per query | 100 max                    |
+  | Free queries/day                   | 100                        |
+  | Pagination                         | start param (1, 11, 21...) |
+
+  ---
+  Architecture Overview
+
+  ┌─────────────────────────────────────────────────────┐
+  │                     main.py                         │
+  │        (CLI entry point + orchestration)            │
+  └─────────────────┬───────────────────────────────────┘
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+  ┌───────────────┐   ┌───────────────────┐
+  │  searcher.py  │   │   downloader.py   │
+  │ (API queries) │   │ (fetch + save)    │
+  └───────────────┘   └───────────────────┘
+          │                   │
+          └─────────┬─────────┘
+                    ▼
+             ┌────────────┐
+             │ config.py  │
+             │ (settings) │
+             └────────────┘
+
+  ---
+  Module Responsibilities
+
+  1. config.py
+
+  - Load API credentials from environment variables (.env)
+  - Define constants (base URL, default output folder)
+
+  2. searcher.py
+
+  - Single function: fetch image metadata from Google API
+  - Handle pagination automatically based on requested count
+  - Return list of {url, source_page} dictionaries
+
+  3. downloader.py
+
+  - Download image from URL with streaming
+  - Sanitize source URL for filename safety
+  - Save with naming convention: pothole_{n}_scraped_from_{sanitized_source}.{ext}
+  - Preserve original file extension (not force .jpg)
+
+  4. main.py
+
+  - CLI interface with argument parsing
+  - Accept: --query, --count, --output-dir
+  - Orchestrate search → download flow
+  - Progress feedback to user
+
+  ---
+  Key Design Decisions
+
+  | Decision                          | Rationale                                           |
+  |-----------------------------------|-----------------------------------------------------|
+  | No third-party wrapper            | Direct API calls = fewer dependencies, more control |
+  | Environment variables for secrets | Industry standard, keeps keys out of code           |
+  | Streaming downloads               | Memory efficient for large images                   |
+  | Preserve original extension       | Don't assume all images are .jpg                    |
+  | Sanitize URLs in filenames        | Prevent filesystem errors from special chars        |
+  | Single responsibility modules     | Clean separation, easy testing                      |
+
+  ---
+  Dependencies (Minimal)
+
+  requests        # HTTP client
+  python-dotenv   # Load .env file
+
+  ---
+  Naming Convention Detail
+
+  pothole_001_scraped_from_example-com-images-pothole-jpg.jpg
+          │                  │                            │
+       index          sanitized source URL         actual extension
+
+  Sanitization: Replace /, :, ?, &, = → - or remove
+
+  ---
+  User Flow
+
+  1. User sets API_KEY and CX in .env file
+  2. Run: python main.py --query "real images of pothole" --count 50 --output-dir ./images
+  3. Program fetches metadata (5 API calls for 50 images)
+  4. Program downloads each image with progress indicator
+  5. Images saved to ./images/ with proper naming
+
+  ---
+  Limitations to Acknowledge
+
+  - Max 100 images per unique query (Google API hard limit)
+  - 100 free API calls/day (then $5/1000 queries)
+  - Some image URLs may be dead/403 (graceful skip with logging)
+
+  ---
+  File Structure
+
+  pothole-scraper/
+  ├── .env                 # API_KEY, CX (git-ignored)
+  ├── .env.example         # Template for users
+  ├── main.py              # Entry point
+  ├── config.py            # Configuration loader
+  ├── searcher.py          # Google API integration
+  ├── downloader.py        # Image download logic
+  ├── requirements.txt     # Dependencies
+  └── images/              # Default output (git-ignored)
+
+  ---
+  Ready for your confirmation to proceed to implementation.
+
+  Sources:
+  - https://developers.google.com/custom-search/v1/overview
+  - https://developers.google.com/custom-search/v1/reference/rest/v1/cse/list
+  - https://blog.expertrec.com/google-custom-search-api-pagination/
+  - https://cloudinary.com/guides/web-performance/downloading-image-from-url-in-python-5-ways-with-code-examples
+  - https://pypi.org/project/sanitize-filename/
+
+> | Results per request                | 10 max                     |
+  | Total accessible results per query | 100 max 
+==================================
+Can you please explain the differences between the two? And, how are they 
+correlated? 
+Also, tell me how many images I can get the most per day? 
+
+● Great question. Let me break this down clearly:
+
+  The Two Limits Explained
+
+  | Limit          | What it means                                                                                                                         |
+  |----------------|---------------------------------------------------------------------------------------------------------------------------------------|
+  | 10 per request | Each API call returns at most 10 images. You cannot request more in one call.                                                         |
+  | 100 per query  | For any search term (e.g., "real images of pothole"), Google only exposes the first 100 results. Period. Even if 10,000 images exist. |
+
+  ---
+  How They Correlate
+
+  To get all 100 images for one search query, you need 10 API calls:
+
+  Call 1:  start=1   → images 1-10
+  Call 2:  start=11  → images 11-20
+  Call 3:  start=21  → images 21-30
+  ...
+  Call 10: start=91  → images 91-100
+
+  Total: 10 calls = 100 images (maximum for that query)
+
+  ---
+  Maximum Images Per Day
+
+  Free Tier (100 API calls/day)
+
+  | Strategy                        | API Calls Used | Images Retrieved |
+  |---------------------------------|----------------|------------------|
+  | 1 query, maxed out              | 10 calls       | 100 images       |
+  | 10 different queries, maxed out | 100 calls      | 1,000 images     |
+
+  Paid Tier (10,000 API calls/day max)
+
+  | Strategy                           | API Calls Used | Images Retrieved |
+  |------------------------------------|----------------|------------------|
+  | 1,000 different queries, maxed out | 10,000 calls   | 100,000 images   |
+
+  ---
+  The Key Insight
+
+  To get more images, you need different search queries, not more API calls on the same query.
+
+  Example variations for your use case:
+  "real images of pothole"         → 100 images
+  "pothole road damage photos"     → 100 images
+  "street pothole pictures"        → 100 images
+  "asphalt pothole images"         → 100 images
+
+  4 queries × 100 images = 400 unique pothole images (using 40 API calls)
+
+  ---
+  Summary
+
+  | Tier | Max Calls/Day | Max Images (single query) | Max Images (multiple queries) |
+  |------|---------------|---------------------------|-------------------------------|
+  | Free | 100           | 100                       | 1,000 (10 queries)            |
+  | Paid | 10,000        | 100                       | 100,000 (1,000 queries)       |
+
+  Would you like me to add multi-query support to the plan so you can maximize image collection?
+
+> Yes add multi-query support, but how can I avoid fetching duplicate 
+images?
+Do deep research on the deduplications method and ultrathink to generate 
+effecient ideas.
+
+● Web Search("Python image deduplication perceptual hash imagehash library")
+  ⎿  Did 1 search in 31s                                                   
+
+● Web Search("detect duplicate images Python dhash phash comparison")
+  ⎿  Did 1 search in 33s                                                   
+
+● Web Search("image deduplication before download URL hash vs content hash
+            strategy")
+  ⎿  Did 1 search in 32s                                                   
+
+● Web Search("Python hamming distance threshold perceptual hash duplicate
+            detection")
+  ⎿  Did 1 search in 26s                                                   
+
+● Excellent research completed. Let me present the updated plan with multi-query support and a robust deduplication strategy.
+
+  ---
+  Updated Plan: Pothole Image Scraper with Deduplication
+
+  Deduplication Strategy: Three-Layer Defense
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                    DEDUPLICATION PIPELINE                       │
+  ├─────────────────────────────────────────────────────────────────┤
+  │                                                                 │
+  │  Layer 1: URL Check              ⚡ Fastest (before download)   │
+  │  ────────────────────                                           │
+  │  • Hash the image URL                                           │
+  │  • Skip if URL already seen                                     │
+  │  • Catches: Same image, same source                             │
+  │                                                                 │
+  │  Layer 2: Content Hash           🔒 After download              │
+  │  ──────────────────────                                         │
+  │  • SHA-256 of raw bytes                                         │
+  │  • Skip if exact file exists                                    │
+  │  • Catches: Same image, different URLs                          │
+  │                                                                 │
+  │  Layer 3: Perceptual Hash        👁️ Visual similarity          │
+  │  ─────────────────────────                                      │
+  │  • dHash (difference hash) - fastest perceptual algorithm       │
+  │  • Hamming distance threshold ≤ 2 bits                          │
+  │  • Catches: Resized, recompressed, slightly edited images       │
+  │                                                                 │
+  └─────────────────────────────────────────────────────────────────┘
+
+  ---
+  Why This Approach?
+
+  | Layer    | Speed    | What It Catches      | False Negatives             |
+  |----------|----------|----------------------|-----------------------------|
+  | URL Hash | ~0.001ms | Exact same URL       | Same image from CDN mirrors |
+  | SHA-256  | ~1ms     | Byte-identical files | Resized/recompressed copies |
+  | dHash    | ~5ms     | Visually similar     | None (with good threshold)  |
+
+  Combined: Near-zero duplicates with minimal overhead.
+
+  ---
+  Updated Architecture
+
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                         main.py                                 │
+  │              (CLI + orchestration + progress)                   │
+  └───────────────────────────┬─────────────────────────────────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          ▼                   ▼                   ▼
+  ┌───────────────┐   ┌───────────────┐   ┌───────────────────┐
+  │  searcher.py  │   │ downloader.py │   │  deduplicator.py  │
+  │  (API calls)  │   │ (fetch+save)  │   │  (3-layer check)  │
+  └───────────────┘   └───────────────┘   └───────────────────┘
+          │                   │                   │
+          └───────────────────┴───────────────────┘
+                              │
+                       ┌──────┴──────┐
+                       │  config.py  │
+                       └─────────────┘
+
+  ---
+  Module Updates
+
+  deduplicator.py (NEW)
+
+  Class: ImageDeduplicator
+  ├── seen_urls: Set[str]           # Layer 1
+  ├── content_hashes: Dict[str, str] # Layer 2: hash → filename
+  ├── perceptual_hashes: List[Tuple] # Layer 3: (dhash, filename)
+  │
+  ├── is_url_seen(url) → bool
+  ├── is_content_duplicate(image_bytes) → bool | str
+  ├── is_visual_duplicate(image_bytes, threshold=2) → bool | str
+  ├── register(url, content_hash, dhash, filename)
+  └── save_state() / load_state()   # Persist across runs
+
+  searcher.py (Updated)
+
+  - Accept list of query variations
+  - Aggregate results from multiple queries
+  - Pass to deduplicator for URL-level filtering
+
+  main.py (Updated)
+
+  New arguments:
+    --queries       Multiple search terms (or file path)
+    --threshold     Perceptual hash threshold (default: 2)
+    --skip-visual   Disable Layer 3 (faster, less accurate)
+    --resume        Load previous dedup state and continue
+
+  ---
+  Multi-Query Support
+
+  Option A: CLI Arguments
+
+  python main.py --queries "real pothole images" "road pothole photos" "street pothole damage" --count 50
+
+  Option B: Queries File
+
+  python main.py --queries-file queries.txt --count 50
+
+  # queries.txt
+  real images of pothole
+  pothole road damage photos
+  asphalt pothole pictures
+  street pothole damage
+
+  ---
+  Deduplication Thresholds
+
+  Based on research with 200,000+ images:
+
+  | dHash Bits | Threshold | Behavior                                   |
+  |------------|-----------|--------------------------------------------|
+  | 128-bit    | 0         | Exact visual match only                    |
+  | 128-bit    | 2         | Recommended - catches resizes, minor edits |
+  | 128-bit    | 4-5       | Starts catching false positives            |
+
+  ---
+  State Persistence (Resume Support)
+
+  // .dedup_state.json
+  {
+    "seen_urls": ["hash1", "hash2", ...],
+    "content_hashes": {"sha256_1": "pothole_001_...", ...},
+    "perceptual_hashes": [["dhash_1", "pothole_001_..."], ...],
+    "last_index": 47
+  }
+
+  Allows:
+  - Resume interrupted downloads
+  - Run across multiple days without re-downloading
+  - Accumulate images over time
+
+  ---
+  Updated Dependencies
+
+  requests          # HTTP client
+  python-dotenv     # Environment config
+  Pillow            # Image processing
+  imagehash         # Perceptual hashing (includes dhash)
+
+  ---
+  Final File Structure
+
+  pothole-scraper/
+  ├── .env                    # API_KEY, CX
+  ├── .env.example
+  ├── .dedup_state.json       # Persisted dedup state (auto-generated)
+  ├── main.py                 # Entry point
+  ├── config.py               # Configuration
+  ├── searcher.py             # Google API
+  ├── downloader.py           # Image fetching
+  ├── deduplicator.py         # 3-layer dedup
+  ├── queries.txt             # Optional query list
+  ├── requirements.txt
+  └── images/                 # Output
+
+  ---
+  Execution Flow
+
+  1. Load config + previous state (if --resume)
+  2. For each query in queries:
+     a. Fetch image metadata from API (paginated)
+     b. For each image URL:
+        ├─ Layer 1: Skip if URL seen → continue
+        ├─ Download image bytes
+        ├─ Layer 2: Skip if SHA-256 exists → continue
+        ├─ Layer 3: Skip if dHash within threshold → continue
+        ├─ Save image with naming convention
+        └─ Register in deduplicator
+     c. Save state periodically
+  3. Final report: downloaded / skipped (by layer) / errors
+
+  ---
+  Expected Output
+
+  $ python main.py --queries-file queries.txt --count 100 --output-dir ./images
+
+  [Query 1/4] "real images of pothole"
+    Fetching metadata... 100 images found
+    Downloading: ████████████████████ 100/100
+    ✓ Downloaded: 87 | Skipped: 13 (URL: 2, SHA: 5, Visual: 6)
+
+  [Query 2/4] "pothole road damage photos"
+    Fetching metadata... 100 images found
+    Downloading: ████████████████████ 100/100
+    ✓ Downloaded: 34 | Skipped: 66 (URL: 12, SHA: 28, Visual: 26)
+
+  ...
+
+  ═══════════════════════════════════════════
+  Total: 156 unique images saved to ./images/
+  Duplicates prevented: 244 (URL: 45, SHA: 89, Visual: 110)
+  ═══════════════════════════════════════════
+
+  ---
+  Summary: Why This Design
+
+  | Principle             | Implementation                             |
+  |-----------------------|--------------------------------------------|
+  | Minimal dependencies  | 4 packages, all well-maintained            |
+  | Single responsibility | Each module does one thing                 |
+  | Fail-safe             | State persistence, graceful error handling |
+  | Configurable          | Threshold, layers, resume capability       |
+  | Efficient             | Skip downloads early, stream large files   |
+  | Accurate              | 3-layer dedup catches all duplicate types  |
+
+  ---
+  Ready for your approval to begin implementation.
+
+  Sources:
+  - https://github.com/JohannesBuchner/imagehash
+  - https://github.com/idealo/imagededup
+  - https://benhoyt.com/writings/duplicate-image-detection/
+  - https://idealo.github.io/imagededup/methods/hashing/
+  - https://pypi.org/project/dhash/
+
+> I only want to implement layer 2 deduplication strategy, I want to fetch 
+all the images and then save only unique ones. 
+Another thing, I want to use multiple query but I want to decide what will 
+be the queries. 
+I want to save the query lists on a .txt files and I want the programme to 
+automatically read from these queries and perform the search for each 
+queries. 
+===========================
+Now, based on these requirements, now do deep research on this conversation 
+and update your plan. 
+
+● Let me review our conversation and create a simplified, focused plan based on your requirements.
+
+  ---
+  Simplified Plan: Pothole Image Scraper
+
+  Requirements Confirmed
+
+  | Requirement   | Decision                            |
+  |---------------|-------------------------------------|
+  | Deduplication | Layer 2 only (SHA-256 content hash) |
+  | Query source  | .txt file (one query per line)      |
+  | Query control | User-defined in the text file       |
+  | Flow          | Fetch all → Save only unique        |
+
+  ---
+  Simplified Architecture
+
+  ┌─────────────────────────────────────────────────────┐
+  │                     main.py                         │
+  │           (CLI + orchestration + progress)          │
+  └─────────────────────┬───────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+  ┌────────────┐  ┌────────────┐  ┌────────────┐
+  │ searcher.py│  │downloader.py│  │  utils.py  │
+  │ (API calls)│  │(fetch+save) │  │(hash+name) │
+  └────────────┘  └────────────┘  └────────────┘
+        │               │               │
+        └───────────────┴───────────────┘
+                        │
+                 ┌──────┴──────┐
+                 │  config.py  │
+                 └─────────────┘
+
+  ---
+  Module Responsibilities
+
+  config.py
+
+  - Load API_KEY and CX from .env
+  - Define constants (API URL, default output folder)
+
+  searcher.py
+
+  - Read queries from .txt file
+  - For each query: fetch image metadata with pagination
+  - Return aggregated list of {url, source_page} dicts
+
+  downloader.py
+
+  - Download image bytes from URL (streaming)
+  - Compute SHA-256 hash of content
+  - Check against seen hashes set
+  - If unique: save with naming convention
+  - If duplicate: skip
+
+  utils.py
+
+  - sanitize_filename(url) → safe string for filesystem
+  - get_file_extension(url, content_type) → proper extension
+  - compute_hash(bytes) → SHA-256 hex digest
+
+  main.py
+
+  - CLI argument parsing
+  - Load queries from file
+  - Orchestrate: search → download → deduplicate → save
+  - Progress display and final report
+
+  ---
+  Deduplication Flow
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │                                                              │
+  │   For each image URL:                                        │
+  │                                                              │
+  │   ┌─────────────┐     ┌─────────────┐     ┌──────────────┐  │
+  │   │  Download   │────▶│ Compute     │────▶│ Hash in set? │  │
+  │   │  bytes      │     │ SHA-256     │     └──────┬───────┘  │
+  │   └─────────────┘     └─────────────┘            │          │
+  │                                                  │          │
+  │                              ┌───────────────────┴────┐     │
+  │                              ▼                        ▼     │
+  │                         ┌────────┐              ┌────────┐  │
+  │                         │  YES   │              │   NO   │  │
+  │                         │ (skip) │              │ (save) │  │
+  │                         └────────┘              └───┬────┘  │
+  │                                                     │       │
+  │                                          ┌──────────▼─────┐ │
+  │                                          │ Save to disk   │ │
+  │                                          │ Add hash to set│ │
+  │                                          └────────────────┘ │
+  │                                                              │
+  └──────────────────────────────────────────────────────────────┘
+
+  ---
+  Queries File Format
+
+  # queries.txt (lines starting with # are ignored)
+
+  real images of pothole
+  pothole road damage photos
+  asphalt pothole pictures
+  street pothole close up
+  pothole on highway
+
+  - One query per line
+  - Empty lines ignored
+  - Lines starting with # treated as comments
+
+  ---
+  Naming Convention
+
+  pothole_001_scraped_from_example-com-path-to-image.jpg
+  │        │              │                          │
+  │        │              │                          └─ Original extension
+  │        │              └─ Sanitized source URL
+  │        └─ Global index (across all queries)
+  └─ Prefix
+
+  Sanitization rules:
+  - https:// and http:// → removed
+  - /, :, ?, &, =, % → -
+  - Multiple - → single -
+  - Truncate if too long (filesystem limits)
+
+  ---
+  CLI Interface
+
+  # Basic usage
+  python main.py --queries queries.txt --count 50 --output ./images
+
+  # Arguments
+  --queries     Path to queries .txt file (required)
+  --count       Max images per query (default: 100, max: 100)
+  --output      Output directory (default: ./images)
+
+  ---
+  Dependencies (Minimal)
+
+  requests        # HTTP client
+  python-dotenv   # Load .env file
+
+  No additional libraries needed - SHA-256 is built into Python's hashlib.
+
+  ---
+  File Structure
+
+  pothole-scraper/
+  ├── .env                 # API_KEY, CX (git-ignored)
+  ├── .env.example         # Template
+  ├── queries.txt          # User-defined queries
+  ├── main.py              # Entry point
+  ├── config.py            # Configuration
+  ├── searcher.py          # Google API integration
+  ├── downloader.py        # Download + dedup logic
+  ├── utils.py             # Helper functions
+  ├── requirements.txt     # Dependencies
+  └── images/              # Output (git-ignored)
+
+  ---
+  Execution Flow
+
+  1. Parse CLI arguments
+  2. Load API credentials from .env
+  3. Read queries from .txt file
+  4. Initialize empty hash set
+  5. Initialize global image counter = 0
+
+  6. For each query:
+     a. Fetch image metadata (paginated up to --count)
+     b. For each image:
+        ├─ Download bytes
+        ├─ Compute SHA-256
+        ├─ If hash NOT in set:
+        │   ├─ counter += 1
+        │   ├─ Generate filename: pothole_{counter}_scraped_from_{sanitized_url}.{ext}
+        │   ├─ Save to disk
+        │   └─ Add hash to set
+        └─ Else: skip (duplicate)
+     c. Log progress
+
+  7. Print final report
+
+  ---
+  Expected Output
+
+  $ python main.py --queries queries.txt --count 50 --output ./images
+
+  Loading queries from queries.txt...
+  Found 5 queries
+
+  [1/5] "real images of pothole"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 47 | Duplicates: 3
+
+  [2/5] "pothole road damage photos"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 31 | Duplicates: 19
+
+  [3/5] "asphalt pothole pictures"
+    Fetching: 50 images
+    Downloading: ████████████████████ 50/50
+    Saved: 28 | Duplicates: 22
+
+  ...
+
+  ════════════════════════════════════════════
+  Summary:
+    Total unique images: 156
+    Duplicates skipped:  94
+    Errors:              0
+    Output: ./images/
+  ════════════════════════════════════════════
+
+  ---
+  Summary
+
+  | Aspect        | Implementation                            |
+  |---------------|-------------------------------------------|
+  | Dependencies  | 2 packages only (requests, python-dotenv) |
+  | Deduplication | SHA-256 content hash (Layer 2 only)       |
+  | Query source  | User-controlled .txt file                 |
+  | Modules       | 5 files, single responsibility each       |
+  | Flexibility   | Configurable count, output dir, queries   |
+
+  ---
+  Ready for your approval to begin implementation.
+
+> Okay, start implementing. 
+
+● Write(config.py)
+  ⎿  Wrote 1 lines to config.py                               
+     """Configuration module for the pothole image scraper."""
+     import os
+     from dotenv import load_dotenv
+     # Load environment variables from .env file
+     load_dotenv()
+     # Google API credentials
+     API_KEY = os.getenv("API_KEY")
+
+● Write(utils.py)
+  ⎿  Wrote 1 lines to utils.py                             
+     """Utility functions for the pothole image scraper."""
+     import hashlib
+     import re
+     from urllib.parse import urlparse
+     def compute_hash(content: bytes) -> str:
+         """Compute SHA-256 hash of content."""
+         return hashlib.sha256(content).hexdigest()
+
+● Write(searcher.py)
+  ⎿  Wrote 1 lines to searcher.py                                  
+     """Google Custom Search API integration for image search."""
+     import requests
+     from config import API_KEY, CX, BASE_URL, RESULTS_PER_PAGE,
+     MAX_RESULTS_PER_QUERY
+     def search_images(query: str, count: int = 100) -> list[dict]:
+         """
+         Search for images using Google Custom Search API.
+
+● Write(downloader.py)
+  ⎿  Wrote 1 lines to downloader.py                                       
+     """Image downloader with SHA-256 deduplication."""
+     import os
+     import requests
+     from utils import compute_hash, sanitize_filename, get_file_extension
+     class ImageDownloader:
+         """Downloads images with content-based deduplication."""
+
+● Write(main.py)
+  ⎿  Wrote 1 lines to main.py                                              
+     """
+     Pothole Image Scraper
+     A tool to search and download pothole images using Google Custom 
+     Search API
+     with automatic deduplication.
+     """
+     import argparse
+     import sys
+     from config import validate_config, DEFAULT_OUTPUT_DIR, DEFAULT_COUNT
+
+● Write(.env.example)
+  ⎿  Wrote 1 lines to .env.example                         
+     # Google Custom Search API credentials
+     # Get your API key from:
+     https://console.developers.google.com/apis/credentials
+     # Get your CX from: https://cse.google.com/cse/all
+     API_KEY=your_api_key_here
+     CX=your_custom_search_engine_id_here
+
+● Write(queries.txt)
+  ⎿  Wrote 1 lines to queries.txt       
+     # Pothole Image Search Queries
+     # Add one query per line
+     # Lines starting with # are ignored
+     real images of pothole
+     pothole road damage photos
+     asphalt pothole pictures
+     street pothole close up
+     pothole on highway
+
+● Write(requirements.txt)
+  ⎿  Wrote 1 lines to requirements.txt
+     requests>=2.28.0
+     python-dotenv>=1.0.0
+
+● Implementation complete. Here's your project structure:
+
+  F:\Codes\Crack Scrapper\
+  ├── .env.example        # Template for API credentials
+  ├── config.py           # Configuration loader
+  ├── utils.py            # Helper functions
+  ├── searcher.py         # Google API integration
+  ├── downloader.py       # Download + SHA-256 deduplication
+  ├── main.py             # CLI entry point
+  ├── queries.txt         # Your search queries (edit this)
+  └── requirements.txt    # Dependencies
+
+  ---
+  Setup Instructions
+
+  1. Install dependencies
+
+  pip install -r requirements.txt
+
+  2. Create .env file
+
+  copy .env.example .env
+
+  Then edit .env with your credentials:
+  API_KEY=your_actual_api_key
+  CX=your_actual_cx_id
+
+  3. Edit queries.txt with your queries
+
+  # Add your queries, one per line
+  real images of pothole
+  pothole road damage
+
+  4. Run the scraper
+
+  # Basic usage
+  python main.py --queries queries.txt
+
+  # With options
+  python main.py --queries queries.txt --count 50 --output ./images
+
+  ---
+  CLI Options
+
+  | Option    | Description          | Default  |
+  |-----------|----------------------|----------|
+  | --queries | Path to queries file | Required |
+  | --count   | Max images per query | 100      |
+  | --output  | Output directory     | ./images |
+  | --prefix  | Filename prefix      | pothole  |
+
+  ---
+  Output Naming
+
+  pothole_001_scraped_from_example-com-path-image.jpg
+  pothole_002_scraped_from_another-site-com-photo.png
+
+  Would you like me to test the setup or make any adjustments?
+
+
+

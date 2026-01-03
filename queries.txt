@@ -1,0 +1,9 @@
+# Pothole Image Search Queries
+# Add one query per line
+# Lines starting with # are ignored
+
+real images of pothole
+pothole road damage photos
+asphalt pothole pictures
+street pothole close up
+pothole on highway
