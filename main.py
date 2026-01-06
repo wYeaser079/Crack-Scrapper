@@ -239,8 +239,17 @@ def main():
                     all_keys_exhausted = True
                     break
 
+                # Handle network/API errors (None = error, can retry)
+                if images is None:
+                    print("  Skipping due to error (will retry on next run)")
+                    tracker.increment_errors()
+                    tracker.save()
+                    continue
+
+                # Handle no results found (empty list = success but no results)
                 if not images:
                     print("  No images found for this combination")
+                    tracker.add_no_results(query_idx, filter_idx, query, filters)
                     tracker.mark_combination_complete(query_idx, filter_idx)
                     tracker.save()
                     continue
@@ -284,9 +293,16 @@ def main():
     print(f"  Completed: {len(tracker.completed)}")
     print(f"  Unique images saved: {stats['images_saved']}")
     print(f"  Duplicates skipped: {stats['duplicates_skipped']}")
+    print(f"  No results found: {stats['no_results']}")
     print(f"  Errors: {stats['errors']}")
     print(f"  API keys used: {api_manager.get_status()['exhausted_count'] + 1} of {api_manager.get_total_keys()}")
     print(f"  Output directory: {args.output}")
+
+    # Show no-results details if any
+    if tracker.no_results_list:
+        print(f"\n  Combinations with no results ({len(tracker.no_results_list)}):")
+        for item in tracker.no_results_list:
+            print(f"    - Query: \"{item['query']}\" | Filter: {item['filters']}")
     print("=" * 60)
 
 

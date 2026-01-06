@@ -35,8 +35,12 @@ class ProgressTracker:
         self.stats = {
             'images_saved': 0,
             'duplicates_skipped': 0,
+            'no_results': 0,
             'errors': 0,
         }
+
+        # Track combinations that returned no results
+        self.no_results_list = []
 
         # Deduplication hashes (persisted across runs)
         self.seen_hashes = set()
@@ -88,8 +92,15 @@ class ProgressTracker:
             self.stats = data.get('stats', {
                 'images_saved': 0,
                 'duplicates_skipped': 0,
+                'no_results': 0,
                 'errors': 0,
             })
+            # Ensure no_results key exists for older progress files
+            if 'no_results' not in self.stats:
+                self.stats['no_results'] = 0
+
+            # Load no results list
+            self.no_results_list = data.get('no_results_list', [])
 
             # Load hashes for deduplication
             self.seen_hashes = set(data.get('seen_hashes', []))
@@ -123,6 +134,7 @@ class ProgressTracker:
                 for q, f in sorted(self.completed)
             ],
             'stats': self.stats,
+            'no_results_list': self.no_results_list,
             'seen_hashes': list(self.seen_hashes),
             'image_counter': self.image_counter,
         }
@@ -179,6 +191,16 @@ class ProgressTracker:
     def increment_errors(self):
         """Increment errors count."""
         self.stats['errors'] += 1
+
+    def add_no_results(self, query_idx: int, filter_idx: int, query: str, filters: dict):
+        """Record a combination that returned no results."""
+        self.stats['no_results'] += 1
+        self.no_results_list.append({
+            'query_index': query_idx,
+            'filter_index': filter_idx,
+            'query': query,
+            'filters': filters if filters else 'no filters',
+        })
 
     def get_resume_point(self) -> tuple[int, int]:
         """Get the point to resume from."""

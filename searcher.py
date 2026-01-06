@@ -50,7 +50,7 @@ def search_images(
     api_manager: APIManager,
     filters: dict = None,
     count: int = 100
-) -> tuple[list[dict], bool]:
+) -> list[dict] | None:
     """
     Search for images using Google Custom Search API.
 
@@ -61,7 +61,8 @@ def search_images(
         count: Number of images to fetch (max 100)
 
     Returns:
-        Tuple of (results list, quota_exhausted flag)
+        - List of image results if successful (can be empty if no results found)
+        - None if network/API error occurred (allows retry on next run)
 
     Raises:
         AllKeysExhaustedError: When all API keys are exhausted
@@ -142,10 +143,10 @@ def search_images(
 
         except requests.exceptions.RequestException as e:
             print(f"  API request failed: {e}")
-            break
+            return None  # Return None to indicate network error (can retry)
         except ValueError as e:
             print(f"  Failed to parse API response: {e}")
-            break
+            return None  # Return None to indicate error (can retry)
 
     return results
 
