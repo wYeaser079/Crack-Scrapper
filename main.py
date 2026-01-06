@@ -8,7 +8,7 @@ with automatic deduplication, multi-key rotation, and resume support.
 import argparse
 import sys
 import os
-from config import validate_config, DEFAULT_OUTPUT_DIR, DEFAULT_COUNT
+from config import validate_config, DEFAULT_OUTPUT_DIR, DEFAULT_COUNT, DEFAULT_QUERIES_FILE, USE_DATE_FILTERS, USE_SIZE_FILTERS
 from utils import read_queries_from_file
 from api_manager import APIManager
 from progress_tracker import ProgressTracker
@@ -28,17 +28,18 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  python main.py --queries queries.txt
-  python main.py --queries queries.txt --count 50 --output ./my_images
-  python main.py --queries queries.txt --no-filters
-  python main.py --queries queries.txt --fresh
+  python main.py                        # Run with defaults (size filters only)
+  python main.py --count 50             # Fetch 50 images per filter
+  python main.py --no-filters           # No filters, just base queries
+  python main.py --date-only            # Use date filters instead
+  python main.py --fresh                # Ignore progress, start fresh
         '''
     )
 
     parser.add_argument(
         '--queries',
-        required=True,
-        help='Path to text file containing search queries (one per line)'
+        default=DEFAULT_QUERIES_FILE,
+        help=f'Path to text file containing search queries (default: {DEFAULT_QUERIES_FILE})'
     )
 
     parser.add_argument(
@@ -148,10 +149,22 @@ def main():
     print(f"Found {len(queries)} queries")
 
     # Determine filter combinations
-    use_date = not args.no_filters and not args.size_only
-    use_size = not args.no_filters and not args.date_only
-
+    # Use config defaults, but allow command line overrides
     if args.no_filters:
+        use_date = False
+        use_size = False
+    elif args.date_only:
+        use_date = True
+        use_size = False
+    elif args.size_only:
+        use_date = False
+        use_size = True
+    else:
+        # Use defaults from config.py
+        use_date = USE_DATE_FILTERS
+        use_size = USE_SIZE_FILTERS
+
+    if not use_date and not use_size:
         filter_combinations = [{}]  # Single empty filter
     else:
         filter_combinations = generate_filter_combinations(use_date, use_size)
